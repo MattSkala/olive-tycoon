@@ -14,10 +14,10 @@
 html, body { margin:0; height:100%; overflow:hidden; background:#e9d6b8; color:var(--ink); font:500 15px/1.35 Fredoka, ui-rounded, "Avenir Next", system-ui, sans-serif; user-select:none; -webkit-user-select:none;
   overscroll-behavior:none; touch-action:pan-x pan-y; -webkit-tap-highlight-color:transparent; } /* no pull-to-refresh, no pinch or double-tap zoom of the page (panels still scroll), no tap flash */
 canvas { position:fixed; inset:0; width:100%; height:100%; display:block; }
-/* ---- loading screen: sky, sun and two olive hills behind a card; it fades out when the game starts */
-#loading { position:fixed; inset:0; z-index:5; display:grid; place-items:center; padding:20px; text-align:center; transition:opacity .45s;
-  background:radial-gradient(circle at 82% 16%, #fff6cf 0 34px, rgba(255,246,207,0) 35px), radial-gradient(130% 62% at 18% 112%, #6f8a3a 59.6%, rgba(111,138,58,0) 60%),
-    radial-gradient(120% 56% at 88% 114%, #93a650 59.6%, rgba(147,166,80,0) 60%), linear-gradient(#6fb3e8, #d6ebf8 72%); }
+/* ---- loading screen: a painting of the groves above the bay (wide or tall, by the screen's shape) with the title card over its sky; it fades out when the game starts */
+#loading { position:fixed; inset:0; z-index:5; display:grid; justify-items:center; align-items:start; padding:max(20px, 13vh) 20px 20px; text-align:center; transition:opacity .45s;
+  background:url(../img/loading-wide.webp) center 65% / cover, linear-gradient(#4d8fdb, #a9cff0); } /* the gradient shows until the picture arrives */
+@media (orientation:portrait) { #loading { background-image:url(../img/loading-tall.webp), linear-gradient(#4d8fdb, #a9cff0); background-position:70% center; } } /* off-centre: keeps the farmhouse in view */
 #loading.done { opacity:0; pointer-events:none; }
 #loading .card { width:min(330px, 100%); padding:22px 22px 16px; }
 #loading .olive { font-size:58px; line-height:1; animation:bob 1.5s ease-in-out infinite; }
