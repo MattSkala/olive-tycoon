@@ -130,7 +130,7 @@ function refreshTop(s) {
   T('repV', `${Math.round(s.rep)}` + (s.medals ? ` · 🏅 ${s.medals}` : ''));
   // tools
   hide($('thirst'), !dry.length); T('thirstN', String(dry.length)); prop($('thirst'), 'title', t('top.thirsty', { n:dry.length }));
-  prop($('ovBtn'), 'className', 'tool' + (app.overlay ? ' on' : '')); T('mute', audio.muted ? '🔇' : '🔊');
+  T('mute', audio.sfx || audio.music ? '🔊' : '🔇');
   // objective and advisor
   const ob = OBJECTIVES[s.goal], pr = ob?.prog?.(s);
   T('goalT', !ob ? t('goal.allDone') : t('goal.' + s.goal, { target:GOAL }) + (pr ? t('goal.progress', { a:fmt.num(Math.floor(Math.min(pr[0], pr[1]))), b:fmt.num(pr[1]) }) : ''));
@@ -166,6 +166,7 @@ function refreshCard(s) {
   hide($('card'), app.sel < 0);
   if (app.sel < 0) return;
   const i = app.sel, F = FARMS[i], f = s.farms[i], st = farmStatus(s, i), stg = stageOf(s, i), free = freeSlots(s, i), n = Math.min(10, free), pk = canPick(s, i);
+  T('cMore', $('card').classList.contains('more') ? `${t('card.less')} ▴` : `${t('card.details')} ▾`);
   T('cName', F.name); T('cBlurb', t(`farm.${i}.blurb`));
   setHTML('cTraits', `<span>${t('soil.' + F.soil)}</span>` + [['Fruit', F.fruit, 1], ['Drain', F.drain, -1], ['Q', F.q, 1]].map(([k, x, good]) =>
     `<span class="${x === 1 ? '' : (x - 1) * good > 0 ? 'pos' : 'neg'}">${t('card.trait' + k, { x })}</span>`).join('')
@@ -238,6 +239,8 @@ function refreshPanels(s) {
   // equipment
   T('investInfo', t('invest.info', { upkeep:upkeep(s), tree:UPKEEP_TREE, sapling:UPKEEP_SAPLING }) + (s.cash < 0 ? t('invest.overdraft', { pct:OVERDRAFT_INTEREST, limit:-OVERDRAFT }) : ''));
   for (const [k, u] of Object.entries(UPGRADES)) { T('up-' + k, s.up[k] ? t('invest.owned') : fmt.eur(u.cost)); $('up-' + k).disabled = !!s.up[k] || !canPay(s, u.cost, 'invest'); }
+  // sound switches
+  for (const part of ['music', 'sfx']) { const b = $('sw-' + part); T('sw-' + part, t(audio[part] ? 'sound.on' : 'sound.off')); prop(b, 'className', 'switch' + (audio[part] ? ' on' : '')); b.setAttribute('aria-pressed', audio[part]); }
   // a pending decision
   const ev = eventView(s);
   if (ev) {

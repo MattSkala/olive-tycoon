@@ -116,8 +116,7 @@ export default {
   'top.repTip':'Pověst zvyšuje každou cenu, kterou dostaneš, a odemyká farmy',
   'top.thirsty':{ one:'{n} farma žízní', few:'{n} farmy žízní', other:'{n} farem žízní' },
   'top.advTip':'Rada: kliknutím přejdeš na farmu',
-  'speed.pause':'Pauza (mezerník)', 'speed.1':'Normální rychlost (klávesa 1)', 'speed.2':'Rychle (klávesa 2)', 'speed.3':'Nejrychleji (klávesa 3)',
-  'speed.water':'Mapa vláhy (V)', 'speed.sound':'Zvuk (M)', 'speed.help':'Jak hrát',
+  'speed.pause':'Pauza (mezerník)', 'speed.1':'Normální rychlost (klávesa 1)', 'speed.2':'Rychle (klávesa 2)', 'speed.3':'Nejrychleji (klávesa 3)', 'speed.sound':'Zvuk: hudba a efekty (M ztlumí vše)', 'speed.help':'Jak hrát',
 
   // ---- popisky na mapě a seznam farem
   'tag.mill':'⚙️ Lisovna', 'tag.millOn':'⚙️ Lisovna · lisuje…', 'tag.farm':'🏠 Statek · investice', 'tag.market':'🛒 Trh · prodej oleje', 'tag.village':'🏘 Mirsini · zakázky',
@@ -130,7 +129,7 @@ export default {
   'canopy.tidyNote':'o {fruit:pct} víc plodů, sklizeň o {pick:pct} rychlejší', 'canopy.grownNote':'je čas na řez', 'canopy.wildNote':'o {fruit:pct} méně plodů, sklizeň o {pick:pct} pomalejší',
   'card.canopyL':'Koruny', 'card.prunedNow':'letos ořezáno', 'card.pruned':{ one:'ořezáno před {n} rokem', few:'ořezáno před {n} lety', other:'ořezáno před {n} lety' },
 
-  'card.close':'Zavřít', 'card.details':'Detaily', 'card.detailsTip':'Zobrazit nebo skrýt podrobnosti farmy',
+  'card.close':'Zavřít', 'card.details':'Detaily', 'card.less':'Méně', 'card.detailsTip':'Zobrazit nebo skrýt podrobnosti farmy',
   'card.bWater':'Zalít', 'card.bDrip':'Závlaha', 'card.bFill':'Doplnit', 'card.bPrune':'Řez', 'card.keyW':'Poslat cisternu (klávesa W)', 'card.keyP':'Zasadit 10 sazenic (klávesa P)',
   'card.crewTip':'Česáči pracují na farmě, dokud není sklizená',
   'card.treesL':'Stromy', 'card.soilL':'Půda', 'card.healthL':'Zdraví', 'card.fruitL':'Plody', 'card.pickersL':'Česáči',
@@ -187,6 +186,8 @@ export default {
   'help.sellHtml':'<b>Prodávej</b> na trhu po částech, protože velká dávka srazí cenu, nebo ber <b>zakázky</b> z vesnice: platí mnohem víc, ale chtějí určitou třídu a mají termín. <b>Pověst</b> zvyšuje všechny tvoje ceny a odemyká lepší farmy.',
   'help.touchHtml':'Dotyk: tažením se pohybuješ, dvěma prsty přibližuješ a otáčíš. Klepnutím na pozemek ho vybereš, klepáním na zralé stromy sklízíš, klepnutím na prázdnou zem zavřeš kartu farmy.',
   'help.keysHtml':'Tažením otáčíš, kolečkem přibližuješ, šipkami posouváš. Klávesy: <kbd>mezerník</kbd> pauza, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> rychlost, <kbd>Tab</kbd> další farma, <kbd>W</kbd> zalít, <kbd>P</kbd> zasadit 10, <kbd>+</kbd> <kbd>−</kbd> česáči, <kbd>V</kbd> mapa vláhy, <kbd>S</kbd> prodej, <kbd>C</kbd> zakázky, <kbd>I</kbd> investice, <kbd>R</kbd> výkaz, <kbd>M</kbd> zvuk, <kbd>Esc</kbd> zavřít, zrušit výběr, pak oddálit.',
+  'sound.title':'🔊 Zvuk', 'sound.music':'Hudba', 'sound.musicNote':'Hudba na pozadí v krétském stylu, vytvořená modelem Google Lyria', 'sound.sfx':'Zvukové efekty', 'sound.sfxNote':'Kliknutí, mince, voda, nůžky a kozy',
+  'sound.on':'Zap.', 'sound.off':'Vyp.',
   'confirm.new':'Opustit tenhle statek a začít znovu?',
 
   'sell.title':'🛒 Trh', 'sell.chart':'Tržní cena za posledních šest měsíců',

@@ -1,7 +1,7 @@
 // Input: every button, key and click on the map ends up as one of the ACTIONS below.
 // Buttons name their action in the markup: data-a="water" data-n="2" calls ACTIONS.water('2').
 import { app, save, setSpeed, restart } from './state.js';
-import { audio, tone, sfx } from './audio.js';
+import { audio, setAudio, sfx } from './audio.js';
 import { world, canvas } from './world.js';
 import { t, fmt } from './i18n.js';
 import { $, float, floatAt, toast, openPanel, closePanel, locked } from './hud.js';
@@ -20,8 +20,7 @@ const ACTIONS = {
   open: n => { if (!locked() && (n !== 'report' || app.s.report)) openPanel(n); },
   close: closePanel,
   speed: n => setSpeed(+n),
-  mute: () => { audio.muted = !audio.muted; },
-  overlay: () => { app.overlay = !app.overlay; },
+  audio: n => setAudio(n, !audio[n]), // the Sound panel's switches: 'music' or 'sfx'
   select: n => select(+n),
   desel: () => { app.sel = -1; },
   more: () => { $('card').classList.toggle('more'); }, // the phone card's Details
@@ -62,7 +61,7 @@ function onKey(e) {
   const k = e.key.toLowerCase(), s = app.s, panelKey = { s:'sell', c:'orders', i:'invest', r:'report' }[k];
   if (e.metaKey || e.ctrlKey || e.altKey || e.target.tagName === 'SELECT') return; // leave the browser its shortcuts, and the language menu its keys
   if (k === 'escape') { if (app.panel) locked() || closePanel(); else if (app.sel >= 0) app.sel = -1; else world.flyTo(-1); } // a third Esc shows the whole estate
-  else if (k === 'm') audio.muted = !audio.muted;
+  else if (k === 'm') { const on = !(audio.sfx || audio.music); setAudio('sfx', on); setAudio('music', on); } // all sound off, or all back on
   else if (locked() || app.panel && !panelKey) return; // under a panel only the keys that switch panel work: nothing acts on a game you cannot see
   else if (k === 'tab') {
     e.preventDefault();
@@ -86,12 +85,12 @@ function onTap(e) {
   const tap = Math.hypot(x - downAt[0], y - downAt[1]) < (e.pointerType === 'touch' ? 12 : 5), p = tap && !s.over && world.pick(x, y); // fingers wobble more than a mouse
   if (!p) { if (tap) app.sel = -1; return; } // empty ground closes the farm card
   if (p.kind === 'building') return act('open', p.panel);
-  if (p.kind === 'goat') { shoo(s); float(x, y, t('float.shoo')); tone(180, .12); }
+  if (p.kind === 'goat') { shoo(s); float(x, y, t('float.shoo')); sfx.shoo(); }
   else if (p.tree && app.speed && canPick(s, p.farm)) { // not while paused: that stripped a whole crop in zero days
     const now = performance.now();
     combo = now - comboAt < 1200 ? Math.min(3, combo + .25) : 1; comboAt = now; // quick clicks build a multiplier
     float(x, y, `+${Math.round(handPick(s, p.farm, combo))} kg` + (combo > 1 ? ` ×${combo}` : ''));
-    world.fx.shake(p.farm, x, y); tone(300 + (combo - 1) * 280, .06); app.sel = p.farm;
+    world.fx.shake(p.farm, x, y); sfx.pick(combo); app.sel = p.farm;
   } else { select(p.farm); sfx.click(); }
   checkGoals(s);
 }

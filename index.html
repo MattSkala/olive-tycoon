@@ -38,8 +38,7 @@
     </div>
     <div id="tools">
       <button class="tool" id="thirst" data-a="thirst">🚰<em class="dot" id="thirstN"></em></button>
-      <button class="tool" id="ovBtn" data-a="overlay" data-i18n-title="speed.water">💧</button>
-      <button class="tool" id="mute" data-a="mute" data-i18n-title="speed.sound">🔊</button>
+      <button class="tool" id="mute" data-a="open" data-n="sound" data-i18n-title="speed.sound">🔊</button>
       <button class="tool" data-a="open" data-n="help" data-i18n-title="speed.help">?</button>
     </div>
   </div>
@@ -55,9 +54,9 @@
     </div>
     <div id="toasts" aria-live="polite"></div>
     <div class="card" id="card">
-      <header>
+      <header data-a="more"><!-- on a phone the header (and its Details pill) folds the facts in and out -->
         <button class="x" data-a="desel" data-i18n-aria="card.close">✕</button>
-        <button class="x" id="cMore" data-a="more" data-i18n="card.details" data-i18n-aria="card.detailsTip"></button>
+        <button id="cMore" data-a="more" data-i18n-aria="card.detailsTip"></button>
         <b id="cName"></b><small id="cBlurb" class="xtra"></small>
         <div id="cTraits" class="xtra"></div>
       </header>
@@ -150,6 +149,12 @@
     <h2 data-i18n="invest.title"></h2>
     <p id="investInfo"></p>
     <div id="upgs"></div>
+  </section>
+  <section data-p="sound">
+    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
+    <h2 data-i18n="sound.title"></h2>
+    <div class="upg"><div><b data-i18n="sound.music"></b><div class="muted" data-i18n="sound.musicNote"></div></div><button class="switch" id="sw-music" data-a="audio" data-n="music"></button></div>
+    <div class="upg"><div><b data-i18n="sound.sfx"></b><div class="muted" data-i18n="sound.sfxNote"></div></div><button class="switch" id="sw-sfx" data-a="audio" data-n="sfx"></button></div>
   </section>
   <section data-p="event">
     <h2 id="evT"></h2>
