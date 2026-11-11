@@ -139,62 +139,79 @@
   </div>
 </div>
 
+<!-- Every panel: a banner with its title, a body that scrolls, and a footer for buttons that must stay in reach.
+     The body is built of the same few parts (see "modal panels" in the stylesheet): .box, .line, .hero, .facts, .note. -->
 <div id="modal" hidden>
   <section data-p="help">
-    <h2 data-i18n="help.title"></h2>
-    <p><label><span data-i18n="help.lang"></span>: <select id="lang"></select></label></p>
-    <p data-i18n-html="help.introHtml"></p>
-    <p data-i18n-html="help.farmsHtml"></p>
-    <p data-i18n-html="help.waterHtml"></p>
-    <p data-i18n-html="help.pruneHtml"></p>
-    <p data-i18n-html="help.harvestHtml"></p>
-    <p data-i18n-html="help.sellHtml"></p>
-    <p class="muted touchonly" data-i18n-html="help.touchHtml"></p>
-    <p class="muted keysonly" data-i18n-html="help.keysHtml"></p>
-    <div class="row"><button class="big" data-a="close" data-i18n="help.play"></button><button data-a="new" data-i18n="help.restart"></button></div>
+    <header><h2 data-i18n="help.title"></h2></header>
+    <div class="body">
+      <div class="box"><label class="line"><i>🌐</i><span data-i18n="help.lang"></span><select id="lang"></select></label></div>
+      <p data-i18n-html="help.introHtml"></p>
+      <div class="box tips">
+        <div class="line"><i class="ic green">🏡</i><p data-i18n-html="help.farmsHtml"></p></div>
+        <div class="line"><i class="ic sky">💧</i><p data-i18n-html="help.waterHtml"></p></div>
+        <div class="line"><i class="ic">✂️</i><p data-i18n-html="help.pruneHtml"></p></div>
+        <div class="line"><i class="ic gold">🧺</i><p data-i18n-html="help.harvestHtml"></p></div>
+        <div class="line"><i class="ic yellow">🛒</i><p data-i18n-html="help.sellHtml"></p></div>
+      </div>
+      <p class="note touchonly" data-i18n-html="help.touchHtml"></p>
+      <p class="note keysonly" data-i18n-html="help.keysHtml"></p>
+    </div>
+    <div class="foot"><button class="big" data-a="close" data-i18n="help.play"></button><button data-a="new" data-i18n="help.restart"></button></div>
   </section>
   <section data-p="sell">
-    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
-    <h2 data-i18n="sell.title"></h2>
-    <p id="sellInfo"></p>
-    <svg viewBox="0 0 180 40" preserveAspectRatio="none" role="img" data-i18n-aria="sell.chart"><polyline id="spark" fill="none" stroke="#b5562b" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>
-    <p class="muted" data-i18n="sell.note"></p>
-    <div class="row"><button id="sell25" data-a="sell" data-n=".25"></button><button id="sell50" data-a="sell" data-n=".5"></button><button class="big" id="sell100" data-a="sell" data-n="1"></button></div>
+    <header><h2 data-i18n="sell.title"></h2><button class="x" data-a="close" data-i18n-aria="card.close">✕</button></header>
+    <div class="body">
+      <div class="hero"><small data-i18n="sell.yours"></small><b id="sellP"></b><small id="sellInfo"></small></div>
+      <div class="facts">
+        <div class="fact"><i>🫙</i><b id="sellL"></b><small data-i18n="top.inCellar"></small></div>
+        <div class="fact"><i>⭐</i><b id="sellG"></b><small data-i18n="sell.grade"></small></div>
+      </div>
+      <div class="box"><h3 data-i18n="sell.chart"></h3>
+        <svg viewBox="0 0 180 40" preserveAspectRatio="none" role="img" data-i18n-aria="sell.chart"><polyline id="spark" fill="none" stroke="#b5562b" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
+      <p class="note" data-i18n="sell.note"></p>
+    </div>
+    <div class="foot"><button id="sell25" data-a="sell" data-n=".25"></button><button id="sell50" data-a="sell" data-n=".5"></button><button class="big" id="sell100" data-a="sell" data-n="1"></button></div>
   </section>
   <section data-p="orders">
-    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
-    <h2 data-i18n="orders.title"></h2>
-    <p class="muted" data-i18n="orders.note"></p>
-    <p id="cellarInfo"></p>
-    <h3 data-i18n="orders.yours"></h3><div id="orderList"></div>
-    <h3 data-i18n="orders.offers"></h3><div id="offerList"></div>
+    <header><h2 data-i18n="orders.title"></h2><button class="x" data-a="close" data-i18n-aria="card.close">✕</button></header>
+    <div class="body">
+      <div class="box"><div class="line"><i class="ic yellow">🫙</i><span id="cellarInfo"></span></div></div>
+      <div class="box"><h3 data-i18n="orders.yours"></h3><div id="orderList"></div></div>
+      <div class="box"><h3 data-i18n="orders.offers"></h3><div id="offerList"></div></div>
+      <p class="note" data-i18n="orders.note"></p>
+    </div>
   </section>
   <section data-p="invest">
-    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
-    <h2 data-i18n="invest.title"></h2>
-    <p id="investInfo"></p>
-    <div id="upgs"></div>
+    <header><h2 data-i18n="invest.title"></h2><button class="x" data-a="close" data-i18n-aria="card.close">✕</button></header>
+    <div class="body">
+      <div class="box" id="upgs"></div>
+      <p class="note" id="investInfo"></p>
+    </div>
   </section>
   <section data-p="sound">
-    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
-    <h2 data-i18n="sound.title"></h2>
-    <div class="upg"><div><b data-i18n="sound.music"></b><div class="muted" data-i18n="sound.musicNote"></div></div><button class="switch" id="sw-music" role="switch" data-a="audio" data-n="music" data-i18n-aria="sound.music"></button></div>
-    <div class="upg"><div><b data-i18n="sound.sfx"></b><div class="muted" data-i18n="sound.sfxNote"></div></div><button class="switch" id="sw-sfx" role="switch" data-a="audio" data-n="sfx" data-i18n-aria="sound.sfx"></button></div>
+    <header><h2 data-i18n="sound.title"></h2><button class="x" data-a="close" data-i18n-aria="card.close">✕</button></header>
+    <div class="body">
+      <div class="box">
+        <div class="line"><i class="ic teal">🎵</i><div><b data-i18n="sound.music"></b><small data-i18n="sound.musicNote"></small></div><button class="switch" id="sw-music" role="switch" data-a="audio" data-n="music" data-i18n-aria="sound.music"></button></div>
+        <div class="line"><i class="ic gold">🔔</i><div><b data-i18n="sound.sfx"></b><small data-i18n="sound.sfxNote"></small></div><button class="switch" id="sw-sfx" role="switch" data-a="audio" data-n="sfx" data-i18n-aria="sound.sfx"></button></div>
+      </div>
+    </div>
   </section>
   <section data-p="event">
-    <h2 id="evT"></h2>
-    <p id="evX"></p>
-    <div class="row"><button class="big" id="ev0" data-a="decide" data-n="0"></button><button id="ev1" data-a="decide" data-n="1"></button></div>
+    <header><h2 id="evT"></h2></header>
+    <div class="body"><p class="lead" id="evX"></p></div>
+    <div class="foot"><button class="big" id="ev0" data-a="decide" data-n="0"></button><button id="ev1" data-a="decide" data-n="1"></button></div>
   </section>
   <section data-p="report">
-    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
-    <div id="repBody"></div>
-    <div class="row"><button class="big" data-a="close" data-i18n="rep.continue"></button></div>
+    <header><h2 id="repT"></h2><button class="x" data-a="close" data-i18n-aria="card.close">✕</button></header>
+    <div class="body" id="repBody"></div>
+    <div class="foot"><button class="big" data-a="close" data-i18n="rep.continue"></button></div>
   </section>
   <section data-p="end">
-    <h2 id="endTitle"></h2>
-    <p id="endText"></p>
-    <div class="row"><button class="big" id="endGo" data-a="close" data-i18n="end.keep"></button><button data-a="new" data-i18n="end.new"></button></div>
+    <header><h2 id="endTitle"></h2></header>
+    <div class="body"><p class="lead" id="endText"></p></div>
+    <div class="foot"><button class="big" id="endGo" data-a="close" data-i18n="end.keep"></button><button data-a="new" data-i18n="end.new"></button></div>
   </section>
 </div>
 

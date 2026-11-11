@@ -70,7 +70,7 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 .res { display:flex; align-items:center; gap:8px; background:var(--cream); border:var(--line); border-radius:999px; box-shadow:var(--lift); padding:4px 16px 4px 4px; line-height:1.15; }
 .res b { font-size:17px; white-space:nowrap; } .res small { font-size:11px; white-space:nowrap; }
 .ic { width:36px; height:36px; flex:none; border-radius:50%; border:2px solid var(--ink); display:grid; place-items:center; font-style:normal; font-weight:700; font-size:17px; }
-.ic.gold { background:var(--gold); } .ic.green { background:#9db650; } .ic.yellow { background:#f6d65b; } .ic.teal { background:var(--teal); color:var(--cream); }
+.ic { background:var(--well); } .ic.sky { background:#bcd9ea; } .ic.gold { background:var(--gold); } .ic.green { background:#9db650; } .ic.yellow { background:#f6d65b; } .ic.teal { background:var(--teal); color:var(--cream); }
 #tools { display:flex; gap:8px; }
 .tool { width:46px; height:46px; padding:0; font-size:19px; background:var(--cream); color:var(--ink); border:var(--line); border-radius:14px; box-shadow:var(--lift); }
 .tool:active { box-shadow:0 2px 0 rgba(47,58,26,.4); } .tool.on { background:var(--gold); }
@@ -166,29 +166,61 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 .chip .bar { width:40px; margin:0; }
 .chip button { padding:1px 8px; font-size:12px; border-radius:999px; box-shadow:none; }
 
-/* ---- modal panels */
+/* ---- modal panels: a banner with the title (sky, sea and olive hills, as on the loading screen), a body that scrolls, a footer for the buttons.
+   The body is built of: .box (a framed group, often under a heading), .line (a row: icon, text, then a value or a button),
+   .hero (the one number the panel is about), .facts (small tiles), .band (a highlighted total) and .note (the small print). */
 #modal { position:fixed; inset:0; z-index:10; background:rgba(20,24,8,.45); display:grid; place-items:center; padding:16px; padding-bottom:max(16px, env(safe-area-inset-bottom)); }
-#modal section { background:var(--cream); border:var(--line); border-radius:20px; padding:20px 22px; width:min(540px,100%); max-height:90vh; max-height:90dvh; overflow:auto; position:relative; box-shadow:0 6px 0 rgba(47,58,26,.5), 0 14px 40px rgba(0,0,0,.4); }
-#modal h2 { margin:0 0 10px; color:var(--olive-d); } #modal h3 { margin:14px 0 2px; font-size:15px; color:var(--olive-d); }
-#modal p { margin:6px 0 10px; } #modal .muted { color:var(--muted); font-size:13px; }
-#modal .x { position:absolute; top:10px; right:10px; font-size:20px; padding:4px 10px; }
-#modal table { width:100%; border-collapse:collapse; font-size:14px; margin:4px 0 10px; align-self:start; }
-#modal td, #modal th { padding:3px 6px; text-align:right; white-space:nowrap; border-bottom:1.5px solid #e3d9b9; }
-#modal td:first-child, #modal th:first-child { text-align:left; white-space:normal; }
-#modal th { color:var(--olive-d); }
-#modal tr.you { background:#eef3cf; font-weight:700; } #modal tr.sale { color:var(--muted); }
-#modal td.wrap { white-space:normal; text-align:left; } #modal td.nw { white-space:nowrap; } #modal td.parched { color:var(--red); } #modal td.dry { color:#c0741a; } #modal td.lush { color:#23806f; }
+#modal section { background:var(--cream); border:var(--line); border-radius:20px; width:min(540px,100%); max-height:90vh; max-height:90dvh; display:flex; flex-direction:column; overflow:hidden; position:relative; box-shadow:0 6px 0 rgba(47,58,26,.5), 0 14px 40px rgba(0,0,0,.4); }
+#modal section[data-p=report] { width:min(660px,100%); }
+#modal header { flex:none; padding:14px 62px 50px 18px; /* the body covers its last 16px */
+  background:radial-gradient(circle at 76% 30%, #fff6cf 0 12px, rgba(255,246,207,0) 13px),
+    radial-gradient(circle at 4% calc(100% - 30px), #3f5a22 0 5px, #3f5a2200 6px), radial-gradient(circle at 12% calc(100% - 37px), #3f5a22 0 5px, #3f5a2200 6px), radial-gradient(circle at 21% calc(100% - 29px), #3f5a22 0 5px, #3f5a2200 6px), radial-gradient(circle at 30% calc(100% - 33px), #3f5a22 0 5px, #3f5a2200 6px), radial-gradient(circle at 79% calc(100% - 27px), #5f7d33 0 5px, #5f7d3300 6px), radial-gradient(circle at 88% calc(100% - 31px), #5f7d33 0 5px, #5f7d3300 6px), radial-gradient(circle at 97% calc(100% - 25px), #5f7d33 0 5px, #5f7d3300 6px), /* olive trees on the hills */
+    radial-gradient(44% 30px at 8% calc(100% - 14px), #5f7d33 97%, rgba(95,125,51,0) 100%), radial-gradient(40% 24px at 94% calc(100% - 14px), #88a047 97%, rgba(136,160,71,0) 100%),
+    linear-gradient(rgba(90,164,214,0) calc(100% - 32px), #5aa4d6 calc(100% - 32px), #8cc4e4),
+    radial-gradient(26% 17px at 56% calc(100% - 32px), #a3bccb 97%, rgba(163,188,203,0) 100%), radial-gradient(20% 11px at 33% calc(100% - 32px), #b7ccd7 97%, rgba(183,204,215,0) 100%),
+    linear-gradient(#79b9ec, #dcedf7); }
+#modal h2 { margin:0; font-size:25px; line-height:1.15; color:var(--olive-d); text-shadow:0 1px 0 rgba(255,255,255,.55); }
+#modal h3 { margin:14px 0 4px; font-size:15px; color:var(--olive-d); }
+#modal p { margin:10px 0; } .muted { color:var(--muted); font-size:13px; } #modal .lead { font-size:16px; }
+#modal .x { position:absolute; top:10px; right:10px; width:38px; height:38px; min-height:0; padding:0; font-size:16px; opacity:1; border-radius:50%; background:var(--cream); border:2px solid var(--ink); box-shadow:0 3px 0 rgba(47,58,26,.4); }
+.body { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; margin-top:-16px; padding:6px 18px 14px; background:var(--cream); border-radius:18px 18px 0 0; }
+.foot { flex:none; display:flex; flex-wrap:wrap; gap:8px; padding:10px 18px 14px; border-top:1.5px solid #e3d9b9; } .foot button { flex:1 1 auto; } .foot .big { flex-grow:2; }
+.box { background:#fffdf4; border:1.5px solid #d8cda6; border-radius:14px; overflow:hidden; margin:10px 0; }
+#modal .box > h3 { margin:0; padding:6px 12px; background:var(--well); }
+#modal .box.in > h3 { background:#e1ebbd; } #modal .box.out > h3 { background:#f7dccf; color:#99331a; }
+.box.in .line > b { color:var(--olive); } .box.out .line > b { color:var(--red); }
+.line { display:flex; gap:9px; align-items:center; padding:7px 12px; border-top:1.5px solid #ece3c4; }
+.line:first-child, h3 + .line { border-top:0; }
+.line > :nth-child(2) { flex:1; min-width:0; } /* the text takes the room between the icon and the value */
+.line > i { flex:none; min-width:22px; text-align:center; font-style:normal; }
+.line > b, .line > em { font-style:normal; white-space:nowrap; text-align:right; } .line > em { color:var(--muted); }
+.line > button, .line > .chip2 { flex:none; } .line p { margin:0; }
+.line.you { background:#e1ebbd; font-weight:700; } .line.sale { color:var(--muted); } .line.sale .ic { filter:grayscale(1); }
+.tips .line { align-items:flex-start; font-size:14px; } .line .ic { width:34px; height:34px; font-size:16px; }
+.chip2.parched { background:#ffd5c7; } .chip2.dry { background:#fde2b0; } .chip2.good { background:#e1ebbd; } .chip2.lush { background:#c8ebe2; }
+.hero { position:relative; overflow:hidden; background:var(--olive-d); color:var(--cream); border-radius:14px; padding:11px 14px 12px; margin:10px 0; }
+.hero::after { content:'🌿'; position:absolute; right:-6px; bottom:-20px; font-size:72px; line-height:1; opacity:.2; transform:rotate(-25deg); pointer-events:none; } /* a sprig in the corner */
+.hero small { color:#d8dfbd; font-size:13px; } .hero > b { display:block; font-size:34px; line-height:1.15; } .hero .neg { color:#ffab8f; }
+.hero .bar { background:rgba(255,255,255,.2); margin:6px 0; max-width:75%; }
+.facts { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:8px; margin:10px 0; }
+.fact { background:#fffdf4; border:1.5px solid #d8cda6; border-radius:14px; padding:8px 6px; text-align:center; line-height:1.2; }
+.fact i { display:block; font-style:normal; font-size:22px; } .fact b { display:block; font-size:17px; margin:2px 0; }
+.band { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; background:#e1ebbd; border-radius:14px; padding:9px 14px; margin:10px 0; }
+.band b { font-size:24px; line-height:1.1; } .band .chip2 { margin-left:auto; }
+#modal .note { background:var(--well); border-radius:12px; padding:8px 12px; color:#5d6447; font-size:13px; }
+#modal table { width:100%; border-collapse:collapse; font-size:14px; }
+#modal td, #modal th { padding:6px 8px; text-align:right; white-space:nowrap; border-top:1.5px solid #ece3c4; }
+#modal th { border-top:0; background:var(--well); color:var(--olive-d); font-size:13px; line-height:1.15; white-space:normal; vertical-align:bottom; } /* headings may wrap, so the columns are only as wide as their numbers */
+#modal td:first-child, #modal th:first-child { text-align:left; white-space:normal; padding-left:12px; } #modal td:last-child, #modal th:last-child { padding-right:12px; }
+#modal tr.you td { background:#e1ebbd; font-weight:700; }
+#modal .wrap { white-space:normal; text-align:left; } #modal td.nw { white-space:nowrap; }
 #lang { font:inherit; padding:3px 6px; border:2px solid var(--ink); border-radius:9px; background:#fff; color:var(--ink); }
-.cols { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
-.row { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
-#modal .row:last-child { position:sticky; bottom:-20px; margin:0; padding:8px 0 5px; background:var(--cream); } /* Play and Continue stay in reach when a panel is taller than the window */
-.upg { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:8px 0; border-top:1.5px solid #e3d9b9; }
-.upg button { white-space:nowrap; }
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:0 10px; align-items:start; } .cols.rep { grid-template-columns:1.2fr 1fr; }
 .switch { flex:none; width:58px; height:32px; padding:0; border-radius:16px; background:#c9c4ab; box-shadow:none; transition:background .15s; } /* a sliding toggle */
 .switch::after { content:''; position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:var(--cream); border:2px solid var(--ink); box-sizing:border-box; transition:transform .15s; }
 .switch.on { background:var(--olive); } .switch.on::after { transform:translateX(26px); }
 .switch:active { transform:none; box-shadow:none; }
-svg { width:100%; height:60px; background:var(--well); border-radius:10px; }
+svg { display:block; width:100%; height:70px; padding:6px 0; }
 kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; font-size:13px; }
 
 /* ---- phones, upright or sideways: no estate list, and the farm card shows the essentials until Details is tapped */
@@ -227,13 +259,14 @@ kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; 
   .tile { width:auto; height:60px; font-size:11px; gap:2px; border-radius:14px; padding:4px 2px; } .tile i { width:28px; height:28px; font-size:14px; border-radius:9px; }
   .chip { font-size:12px; } .chip > span:nth-child(3), .chip:not(.alert) button { display:none; } .chip:not(.alert) { padding-right:11px; } /* name and moisture bar; a thirsty farm also gets its water button, the card has the rest */
   #modal { padding:0; padding-bottom:env(safe-area-inset-bottom); place-items:end stretch; }
-  #modal section { width:100%; max-height:88vh; max-height:88dvh; border-radius:20px 20px 0 0; border-bottom:0; padding:16px 14px 20px; }
-  .cols { grid-template-columns:1fr; } #modal .row button { flex:1; }
+  #modal section { max-height:88vh; max-height:88dvh; border-radius:20px 20px 0 0; border-bottom:0; }
+  #modal header { padding:12px 58px 44px 14px; } #modal h2 { font-size:21px; } .body { padding:4px 12px 12px; } .foot { padding:8px 12px 12px; } .foot button { padding-left:8px; padding-right:8px; }
+  .cols, .cols.rep { grid-template-columns:1fr; } .cols.rep > :last-child { order:-1; } /* the season's result first, then the ledger */
 }
 @media (pointer:coarse) { /* fingers need bigger targets than a mouse pointer */
   button { min-height:44px; } button.round { width:40px; height:40px; min-height:40px; }
   .switch { width:66px; height:36px; min-height:36px; border-radius:18px; } .switch::after { width:28px; height:28px; } .switch.on::after { transform:translateX(30px); }
   .seg button { min-height:36px; min-width:38px; } .chip { min-height:38px; } .chip button { min-height:32px; padding:3px 11px; font-size:13px; }
-  .frow { padding:9px 8px; } #modal .x { min-width:44px; }
+  .frow { padding:9px 8px; } #modal .x { width:44px; height:44px; }
   .touchonly { display:block; } .keysonly { display:none; }
 }

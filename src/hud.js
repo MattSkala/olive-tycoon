@@ -4,7 +4,7 @@ import { app, setSpeed } from './state.js';
 import { audio } from './audio.js';
 import { world } from './world.js';
 import { t, fmt, monthName, LANGS, getLang, setLang, translatePage } from './i18n.js';
-import { DETAILS, SEASON, ledgerHTML } from './details.js';
+import { DETAILS, SEASON, ledgerHTML, line, hero } from './details.js';
 import { DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, CREW_MAX, UPGRADES, MAX_ORDERS, FARMS, CANOPY } from './config.js';
 import {
   OBJECTIVES, advice, buyBlock, canDeliver, canPay, canPick, canopyOf, crewTotal, pruneBlock, pruneCost, dripCost, eventView, farmStatus, freeSlots, fruitAll, fruitFrac, gradeOf, growth,
@@ -29,7 +29,7 @@ function action(id, price, why) {
   if (b.getAttribute('aria-disabled') !== String(!!why)) b.setAttribute('aria-disabled', !!why);
 }
 
-const MEDAL_ICON = { gold:'🥇', silver:'🥈', bronze:'🥉' };
+const MEDAL_ICON = { gold:'🥇', silver:'🥈', bronze:'🥉' }, UP_ICON = { shakers:'🚜', press:'⚙️', bottling:'🍾', borehole:'⛲' };
 const PAGE = { goal:GOAL, start:START_CASH, limit:-OVERDRAFT }; // the numbers quoted by static texts
 const narrow = matchMedia('(max-width:700px)'); // the upright-phone layout: shorter texts, the card is a sheet
 
@@ -95,9 +95,9 @@ export function initHud() {
   });
   $('list').innerHTML = FARMS.map((F, i) => `<div class="frow" data-a="select" data-n="${i}"><b></b><span class="bar"><i></i></span><small></small></div>`).join('');
   $('upgs').innerHTML = Object.keys(UPGRADES).map(k =>
-    `<div class="upg"><div><b data-i18n="up.${k}.name"></b><div class="muted" data-i18n="up.${k}.desc"></div></div><button id="up-${k}" data-a="up" data-n="${k}"></button></div>`).join('');
+    `<div class="line"><i class="ic green">${UP_ICON[k]}</i><div><b data-i18n="up.${k}.name"></b><small data-i18n="up.${k}.desc"></small></div><button id="up-${k}" data-a="up" data-n="${k}"></button></div>`).join('');
   for (const name of Object.keys(DETAILS)) // one modal section per detail panel; its content is drawn while it is open
-    $('modal').insertAdjacentHTML('beforeend', `<section data-p="${name}" hidden><button class="x" data-a="close" data-i18n-aria="card.close">✕</button><div id="${name}Body"></div></section>`);
+    $('modal').insertAdjacentHTML('beforeend', `<section data-p="${name}" hidden><header><h2 data-i18n="${name}.title"></h2><button class="x" data-a="close" data-i18n-aria="card.close">✕</button></header><div class="body" id="${name}Body"></div></section>`);
   $('lang').innerHTML = Object.entries(LANGS).map(([code, table]) => `<option value="${code}">${table.langName}</option>`).join('');
   $('lang').value = getLang();
   $('lang').onchange = e => { setLang(e.target.value, true); translatePage(PAGE); };
@@ -226,20 +226,21 @@ function refreshBottom(s, frac) {
 // the modal panels: all are kept current, so whichever is open is right
 function refreshPanels(s) {
   // market
-  T('sellInfo', t('sell.info', { l:s.oil, grade:gradeOf(s.oilQ), p:s.price, q:s.oilQ, bottled:s.up.bottling ? t('sell.bottled') : '', rep:1 + s.rep / 200, sp:sellPrice(s) }));
+  T('sellP', fmt.eur2(sellPrice(s))); T('sellInfo', t('sell.info', { p:s.price, q:s.oilQ, bottled:s.up.bottling ? t('sell.bottled') : '', rep:1 + s.rep / 200 }));
+  T('sellL', t('u.l', { l:s.oil })); T('sellG', s.oil >= 1 ? gradeName(s.oilQ) : '—');
   for (const [id, part] of [['sell25', .25], ['sell50', .5], ['sell100', 1]]) { T(id, t('sell.' + id.slice(4), { v:sellValue(s, s.oil * part) })); $(id).disabled = s.oil < 1; }
   if (s.hist.length > 1) { // the price chart
     const lo = Math.min(...s.hist), hi = Math.max(...s.hist), span = hi - lo || 1;
     $('spark').setAttribute('points', s.hist.map((p, i) => `${180 - s.hist.length + i + 1},${(36 - (p - lo) / span * 32).toFixed(1)}`).join(' '));
   }
   // contracts
-  const orderRow = (o, text, button) => `<div class="upg"><div><b>${t('buyer.' + o.buyer)}</b><div class="muted">${t('orders.row', { l:o.litres, grade:gradeOf(o.minQ), p:o.price, v:o.litres * o.price })}<br>${text}</div></div>${button}</div>`;
+  const orderRow = (o, text, button) => `<div class="line"><i class="ic gold">📜</i><div><b>${t('buyer.' + o.buyer)}</b><small>${t('orders.row', { l:o.litres, grade:gradeOf(o.minQ), p:o.price, v:o.litres * o.price })}<br>${text}</small></div>${button}</div>`;
   T('cellarInfo', t('orders.cellar', { l:s.oil, grade:gradeOf(s.oilQ) }));
   setHTML('orderList', s.orders.map((o, k) => orderRow(o,
     (o.months ? t('orders.left', { n:o.months }) : t('orders.due')) + (canDeliver(s, o) ? '' : t(s.oil < o.litres ? 'orders.noOil' : 'orders.lowGrade')),
-    `<button data-a="deliver" data-n="${k}" ${canDeliver(s, o) ? '' : 'disabled'}>${t('orders.deliver')}</button>`)).join('') || `<p class="muted">${t('orders.none')}</p>`);
+    `<button data-a="deliver" data-n="${k}" ${canDeliver(s, o) ? '' : 'disabled'}>${t('orders.deliver')}</button>`)).join('') || `<div class="line muted">${t('orders.none')}</div>`);
   setHTML('offerList', s.offers.map((o, k) => orderRow(o, t('orders.within', { n:o.months }),
-    `<button data-a="accept" data-n="${k}" ${s.orders.length < MAX_ORDERS ? '' : 'disabled'}>${t('orders.accept')}</button>`)).join('') || `<p class="muted">${t('orders.noOffers')}</p>`);
+    `<button data-a="accept" data-n="${k}" ${s.orders.length < MAX_ORDERS ? '' : 'disabled'}>${t('orders.accept')}</button>`)).join('') || `<div class="line muted">${t('orders.noOffers')}</div>`);
   // equipment
   T('investInfo', t('invest.info', { upkeep:upkeep(s), tree:UPKEEP_TREE, sapling:UPKEEP_SAPLING }) + (s.cash < 0 ? t('invest.overdraft', { pct:OVERDRAFT_INTEREST, limit:-OVERDRAFT }) : ''));
   for (const [k, u] of Object.entries(UPGRADES)) { T('up-' + k, s.up[k] ? t('invest.owned') : fmt.eur(u.cost)); $('up-' + k).disabled = !!s.up[k] || !canPay(s, u.cost, 'invest'); }
@@ -251,7 +252,7 @@ function refreshPanels(s) {
     T('evT', t(`ev.${ev.id}.title`)); T('evX', t(`ev.${ev.id}.text`, { farm:ev.farm }));
     ev.opts.forEach((o, k) => { const label = t(`ev.${ev.id}.opt${k}`); T('ev' + k, o.cost ? t('ev.optCost', { label, cost:o.cost }) : label); $('ev' + k).disabled = !o.can; });
   }
-  if (app.panel === 'report' && s.report) setHTML('repBody', reportHTML(s.report));
+  if (app.panel === 'report' && s.report) { T('repT', t('rep.title', { n:s.report.season })); setHTML('repBody', reportHTML(s.report)); }
   if (DETAILS[app.panel]) setHTML(app.panel + 'Body', DETAILS[app.panel](s));
   if (app.panel === 'end') {
     const won = app.end === 'won';
@@ -262,14 +263,14 @@ function refreshPanels(s) {
 
 // the season report (s.report, drawn up by the rules on 1 February)
 function reportHTML(r) {
-  return `<h2>${t('rep.title', { n:r.season })}</h2>
-    ${ledgerHTML(r.books)}
-    <p><b>${t('rep.profit')} <span class="${r.profit < 0 ? 'neg' : ''}">${fmt.eur(r.profit)}</span></b><br>${t('rep.pressed', { l:r.litres })}${r.q ? t('rep.avgGrade', { grade:gradeOf(r.q) }) : ''}
-      · ${r.medal ? t('rep.medal', { icon:MEDAL_ICON[r.medal], medal:r.medal }) : t('rep.noMedal')}</p>
-    <table><tr>${['farm', 'picked', 'water', 'dryDays', 'health'].map(k => `<th>${t('rep.' + k)}</th>`).join('')}</tr>${r.farms.map(f =>
-      `<tr><td>${nameOf(app.s, f.i)}</td><td>${t('u.kg', { kg:f.kg })}</td><td>${fmt.eur(f.water)}</td><td>${f.dryDays}</td><td>${fmt.pct(f.health / 100)}</td></tr>`).join('')}</table>
-    <p><b>${t('rep.worth', { w:r.worth })}</b> · ${t('title.' + rankOf(r.worth))} · ${t('rep.ofGoal', { pct:Math.max(0, r.worth) / GOAL })}</p>
-    <table><tr><th>${t('rep.league')}</th><th>${t('rep.estate')}</th></tr>${r.league.map((l, k) =>
-      `<tr class="${l.you ? 'you' : ''}"><td>${k + 1}. ${l.name ?? t('rep.you')}</td><td>${fmt.eur(l.worth)}</td></tr>`).join('')}</table>
-    <p class="muted">${r.rank === 1 ? t('rep.lead') : t('rep.rank', { rank:r.rank, of:r.league.length })}</p>`;
+  const health = h => `<span class="chip2 ${h >= 70 ? 'good' : h >= 40 ? 'dry' : 'parched'}">${fmt.pct(h / 100)}</span>`;
+  return `<div class="cols rep"><div>${ledgerHTML(r.books)}</div><div>
+      ${hero(t('rep.profit'), fmt.eur(r.profit), '', null, r.profit < 0)}
+      <div class="box">${line('🫙', t('rep.pressed'), t('u.l', { l:r.litres }))}${line('⭐', t('rep.avgGrade'), r.q ? gradeName(r.q) : '—')}${line(MEDAL_ICON[r.medal] || '🎖', t('rep.medal'), r.medal ? t('medal.' + r.medal) : t('rep.noMedal'))}</div>
+    </div></div>
+    <div class="box"><table><tr>${['farm', 'picked', 'water', 'dryDays', 'health'].map(k => `<th>${t('rep.' + k)}</th>`).join('')}</tr>${r.farms.map(f =>
+      `<tr><td>${nameOf(app.s, f.i)}</td><td>${t('u.kg', { kg:f.kg })}</td><td>${fmt.eur(f.water)}</td><td>${f.dryDays}</td><td>${health(f.health)}</td></tr>`).join('')}</table></div>
+    <div class="band"><span>${t('estate.total')}</span><b>${fmt.eur(r.worth)}</b><span class="chip2">${t('title.' + rankOf(r.worth))} · ${t('rep.ofGoal', { pct:Math.max(0, r.worth) / GOAL })}</span></div>
+    <div class="box"><h3>${t('rep.league')}</h3>${r.league.map((l, k) => line(`${k + 1}.`, l.name ?? t('rep.you'), fmt.eur(l.worth), l.you ? 'you' : '')).join('')}</div>
+    <p class="note">${r.rank === 1 ? t('rep.lead') : t('rep.rank', { rank:r.rank, of:r.league.length })}</p>`;
 }
