@@ -37,6 +37,9 @@ button.big:disabled, button.blue:disabled, button.gold:disabled { background:#c9
 button.round { width:32px; height:32px; padding:0; font-size:18px; }
 button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.75; padding:4px 9px; } /* close and Details: bare */
 
+[data-a] { cursor:pointer; } .go { color:var(--orange); font-size:17px; line-height:1; } /* whatever acts on a click, and the little arrow on a bubble that leads somewhere */
+@media (hover:hover) { #estate:hover, .res:hover, .task:hover, tr[data-a]:hover { filter:brightness(.96); } }
+
 /* ---- the HUD frame; above the map tags, so a farm chip never covers a card */
 #hud { position:fixed; inset:0; z-index:1; pointer-events:none; display:flex; flex-direction:column; gap:10px;
   padding:max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
@@ -63,14 +66,14 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 #left { width:262px; max-height:100%; display:flex; flex-direction:column; gap:10px; }
 #goal h3 { margin:0 0 6px; font-size:16px; }
 .task { display:flex; gap:8px; justify-content:space-between; align-items:flex-start; background:var(--well); border-radius:12px; padding:8px 10px; font-size:14px; }
-#adv { display:block; width:100%; margin-top:8px; padding:0; text-align:left; background:none; border:0; box-shadow:none; color:var(--ink); font-weight:500; font-size:13.5px; }
+#adv { display:flex; gap:6px; justify-content:space-between; align-items:flex-start; width:100%; margin-top:8px; padding:0; text-align:left; background:none; border:0; box-shadow:none; color:var(--ink); font-weight:500; font-size:13.5px; }
 #list { padding:6px; overflow:auto; min-height:0; }
 .frow { display:grid; grid-template-columns:1fr 54px; gap:0 8px; align-items:center; padding:5px 8px; border-radius:11px; cursor:pointer; }
 .frow.on { background:#f0e2b0; }
 .frow small { grid-column:1 / 3; } .frow .bar { margin:0; }
 .frow.alert b::after { content:' ●'; color:var(--red); }
 #toasts { flex:1; display:flex; flex-direction:column; gap:6px; align-items:center; }
-.toast { background:var(--cream); border:2px solid var(--ink); padding:7px 14px; border-radius:999px; box-shadow:0 3px 0 rgba(47,58,26,.35); animation:pop .25s; max-width:100%; }
+.toast { pointer-events:auto; cursor:pointer; background:var(--cream); border:2px solid var(--ink); padding:7px 14px; border-radius:999px; box-shadow:0 3px 0 rgba(47,58,26,.35); animation:pop .25s; max-width:100%; }
 .toast.warn { background:#ffe0d4; border-color:var(--red); } .toast.good { background:#eef4c8; }
 @keyframes pop { from { transform:translateY(-8px); opacity:0; } }
 
@@ -139,7 +142,8 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 #modal td, #modal th { padding:3px 6px; text-align:right; white-space:nowrap; border-bottom:1.5px solid #e3d9b9; }
 #modal td:first-child, #modal th:first-child { text-align:left; white-space:normal; }
 #modal th { color:var(--olive-d); }
-#modal tr.you { background:#eef3cf; font-weight:700; }
+#modal tr.you { background:#eef3cf; font-weight:700; } #modal tr.sale { color:var(--muted); }
+#modal td.wrap { white-space:normal; text-align:left; } #modal td.nw { white-space:nowrap; } #modal td.parched { color:var(--red); } #modal td.dry { color:#c0741a; } #modal td.lush { color:#23806f; }
 #lang { font:inherit; padding:3px 6px; border:2px solid var(--ink); border-radius:9px; background:#fff; color:var(--ink); }
 .cols { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
 .row { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }

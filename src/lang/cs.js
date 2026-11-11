@@ -159,6 +159,23 @@ export default {
   'market.head':'Trh s olejem', 'market.perLitre':'za litr', 'market.sell':'Prodat olej · {l:num} l', 'market.tile':'Trh', 'market.change':'Změna tržní ceny za poslední měsíc',
   'bar.reportTip':'Výkaz za minulou sezónu (R)',
 
+  // ---- podrobnosti (klepni na kartu statku, ukazatel nahoře, datum nebo úkol)
+  'goal.tip':'Přejít tam, kde se to dělá',
+  'estate.title':'🏛 Tvůj statek', 'estate.rank':'Stupeň {n} z {of}: {title}', 'estate.total':'Hodnota statku',
+  'estate.cash':'Hotovost', 'estate.oil':'Olej ve sklepě ({l:num} l po {v:eur})', 'estate.land':'Půda', 'estate.trees':'Stromy a sazenice',
+  'estate.drip':'Kapková závlaha (polovina ceny)', 'estate.equipment':'Vybavení (polovina ceny)',
+  'estate.goal':'{pct:pct} z cíle {goal:eur}.', 'estate.ranks':'Stupně', 'estate.from':'od {w:eur}',
+  'estate.note':'K výhře dosáhni cíle a dokonči úkoly.',
+  'money.title':'💶 Peníze', 'money.cash':'Hotovost {cash:eur}', 'money.season':'Tato sezóna zatím',
+  'money.monthly':'Běžné náklady: údržba {upkeep:eur} a česáči {wages:eur} měsíčně.',
+  'farms.title':'🫒 Tvoje háje', 'farms.hint':'Klepnutím na farmu se na ni přesuneš.',
+  'fame.title':'⭐ Pověst', 'fame.now':'{rep} ze 100. Každá cena, kterou dostaneš, je o {bonus:pct} vyšší.',
+  'fame.green':{ one:'{n} Zelený palec', few:'{n} Zelené palce', other:'{n} Zelených palců' }, 'fame.unlocks':'Farmy, které odemyká', 'fame.need':'od pověsti {rep}',
+  'fame.how':'Pověst získáš plněním zakázek, medailemi ze Sitie, zaléváním všech farem přes léto (Zelený palec), plněním úkolů, příspěvkem na vesnickou slavnost a vedením ligy pěstitelů. Zmeškaná zakázka stojí 5.',
+  'cal.title':'📅 Olivový rok', 'cal.month':'Měsíc', 'cal.rain':'Deštivé dny', 'cal.dry':'Půda za den', 'cal.work':'V hájích',
+  'cal.harvest':'{stage:stage.*} olivy: olej {yield:pct}, kvalita {q:pct}', 'cal.growth':'plody rostou', 'cal.prune':'řez', 'cal.rest':'klid',
+  'cal.note':'Půda za den: kolik bodů vlhkosti ztratí běžná farma každý den. Rané olivy dají méně oleje vyšší třídy.',
+
   // ---- panely
   'help.title':'🫒 Mirsini · Olivový magnát', 'help.lang':'Jazyk', 'help.play':'Hrát ▶', 'help.restart':'Začít znovu',
   'help.introHtml':'Zdědil jsi Patriko, háj 60 olivovníků odrůdy Koroneiki nad zálivem Mirabello, a k tomu {start:eur}. Vybuduj statek v hodnotě <b>{goal:eur}</b>: počítá se hotovost, olej, půda, stromy i vybavení, takže investice tě nikdy nevrátí zpět. Nech si ale peníze na údržbu a mzdy: pod −{limit:eur} banka prodá tvůj sklep a pak statek zabaví.',

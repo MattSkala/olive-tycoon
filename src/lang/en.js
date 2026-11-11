@@ -164,6 +164,23 @@ export default {
   'market.head':'Oil market', 'market.perLitre':'per litre', 'market.sell':'Sell oil · {l:num} L', 'market.tile':'Market', 'market.change':'Change of the market price over the last month',
   'bar.reportTip':'Last season\'s report (R)',
 
+  // ---- detail panels (tap the estate card, a resource pill, the date or an objective)
+  'goal.tip':'Go to where this is done',
+  'estate.title':'🏛 Your estate', 'estate.rank':'Rank {n} of {of}: {title}', 'estate.total':'Estate value',
+  'estate.cash':'Cash', 'estate.oil':'Oil in the cellar ({l:num} L at {v:eur} each)', 'estate.land':'Land', 'estate.trees':'Trees and saplings',
+  'estate.drip':'Drip lines (half their price)', 'estate.equipment':'Equipment (half its price)',
+  'estate.goal':'{pct:pct} of the goal of {goal:eur}.', 'estate.ranks':'Ranks', 'estate.from':'from {w:eur}',
+  'estate.note':'To win, reach the goal and finish the objectives.',
+  'money.title':'💶 Money', 'money.cash':'Cash {cash:eur}', 'money.season':'This season so far',
+  'money.monthly':'Running costs: upkeep {upkeep:eur} and pickers {wages:eur} a month.',
+  'farms.title':'🫒 Your groves', 'farms.hint':'Tap a farm to go there.',
+  'fame.title':'⭐ Reputation', 'fame.now':'{rep} of 100. Every price you get is {bonus:pct} higher.',
+  'fame.green':{ one:'{n} Green Thumb', other:'{n} Green Thumbs' }, 'fame.unlocks':'Farms it unlocks', 'fame.need':'from reputation {rep}',
+  'fame.how':'You earn reputation by delivering contracts, winning medals at Sitia, keeping every farm watered through the summer (Green Thumb), finishing objectives, sponsoring the village festival and leading the growers\' league. A missed order costs 5.',
+  'cal.title':'📅 The olive year', 'cal.month':'Month', 'cal.rain':'Rainy days', 'cal.dry':'Soil a day', 'cal.work':'In the groves',
+  'cal.harvest':'{stage:stage.*} olives: oil {yield:pct}, quality {q:pct}', 'cal.growth':'fruit grows', 'cal.prune':'pruning', 'cal.rest':'rest',
+  'cal.note':'Soil a day: moisture points an ordinary farm loses each day. Early olives give less oil of a finer grade.',
+
   // ---- panels
   'help.title':'🫒 Mirsini · Olive Tycoon', 'help.lang':'Language', 'help.play':'Play ▶', 'help.restart':'Restart game',
   'help.introHtml':'You inherit Patriko, a grove of 60 Koroneiki olive trees above the Gulf of Mirabello, and {start:eur}. Build an estate worth <b>{goal:eur}</b>: cash, oil, land, trees and equipment all count, so investing never sets you back. Keep cash for upkeep and wages, though: below −{limit:eur} the bank sells your cellar, then forecloses.',

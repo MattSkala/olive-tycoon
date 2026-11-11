@@ -4,6 +4,7 @@ import { app, setSpeed } from './state.js';
 import { audio } from './audio.js';
 import { world } from './world.js';
 import { t, fmt, monthName, LANGS, getLang, setLang, translatePage } from './i18n.js';
+import { DETAILS, SEASON, ledgerHTML } from './details.js';
 import { DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, CREW_MAX, UPGRADES, MAX_ORDERS, FARMS, CANOPY, PRUNE_MONTHS } from './config.js';
 import {
   OBJECTIVES, advice, buyBlock, canDeliver, canPay, canPick, canopyOf, crewTotal, pruneBlock, pruneCost, dripCost, eventView, farmStatus, freeSlots, fruitAll, fruitFrac, gradeOf, growth,
@@ -20,15 +21,14 @@ const fill = (e, x, c = '') => { prop(e.style, 'width', Math.round(Math.max(0, M
 const btn = (id, label, why) => { T(id, why ? t('card.why', { label, why }) : label); prop($(id), 'disabled', !!why); }; // a disabled button says why
 const cap = w => w[0].toUpperCase() + w.slice(1);
 
-const SEASON = ['❄️', '❄️', '🌸', '🌸', '🌸', '☀️', '☀️', '☀️', '🍂', '🍂', '🍂', '❄️']; // icon by month
 const MEDAL_ICON = { gold:'🥇', silver:'🥈', bronze:'🥉' };
 const PAGE = { goal:GOAL, start:START_CASH, limit:-OVERDRAFT }; // the numbers quoted by static texts
 const narrow = matchMedia('(max-width:700px)'); // the upright-phone layout: shorter texts, the card is a sheet
 
 // ---------- toasts and floating numbers ----------
-export function toast(text, kind) {
+export function toast(text, kind, onClick) {
   const e = document.createElement('div');
-  e.className = 'toast ' + kind; e.textContent = ({ good:'⭐ ', warn:'⚠️ ' }[kind] || '') + text;
+  e.className = 'toast ' + kind; e.onclick = onClick; e.textContent = ({ good:'⭐ ', warn:'⚠️ ' }[kind] || '') + text;
   $('toasts').append(e);
   while ($('toasts').children.length > 4) $('toasts').firstChild.remove();
   setTimeout(() => e.remove(), 6000);
@@ -85,6 +85,8 @@ export function initHud() {
   $('list').innerHTML = FARMS.map((F, i) => `<div class="frow" data-a="select" data-n="${i}"><b></b><span class="bar"><i></i></span><small></small></div>`).join('');
   $('upgs').innerHTML = Object.keys(UPGRADES).map(k =>
     `<div class="upg"><div><b data-i18n="up.${k}.name"></b><div class="muted" data-i18n="up.${k}.desc"></div></div><button id="up-${k}" data-a="up" data-n="${k}"></button></div>`).join('');
+  for (const name of Object.keys(DETAILS)) // one modal section per detail panel; its content is drawn while it is open
+    $('modal').insertAdjacentHTML('beforeend', `<section data-p="${name}" hidden><button class="x" data-a="close" data-i18n-aria="card.close">✕</button><div id="${name}Body"></div></section>`);
   $('lang').innerHTML = Object.entries(LANGS).map(([code, table]) => `<option value="${code}">${table.langName}</option>`).join('');
   $('lang').value = getLang();
   $('lang').onchange = e => { setLang(e.target.value, true); translatePage(PAGE); };
@@ -235,6 +237,7 @@ function refreshPanels(s) {
     ev.opts.forEach((o, k) => { const label = t(`ev.${ev.id}.opt${k}`); T('ev' + k, o.cost ? t('ev.optCost', { label, cost:o.cost }) : label); $('ev' + k).disabled = !o.can; });
   }
   if (app.panel === 'report' && s.report) setHTML('repBody', reportHTML(s.report));
+  if (DETAILS[app.panel]) setHTML(app.panel + 'Body', DETAILS[app.panel](s));
   if (app.panel === 'end') {
     const won = app.end === 'won';
     T('endTitle', t(won ? 'end.won' : 'end.bankrupt'));
@@ -244,10 +247,8 @@ function refreshPanels(s) {
 
 // the season report (s.report, drawn up by the rules on 1 February)
 function reportHTML(r) {
-  const lines = (head, keys) => `<table><tr><th>${t(head)}</th><th></th></tr>${keys.filter(k => r.books[k]).map(k => `<tr><td>${t('books.' + k)}</td><td>${fmt.eur(r.books[k])}</td></tr>`).join('')
-    || `<tr><td class="muted">${t('rep.nothing')}</td><td></td></tr>`}</table>`;
   return `<h2>${t('rep.title', { n:r.season })}</h2>
-    <div class="cols">${lines('rep.income', ['sales', 'contracts', 'prizes'])}${lines('rep.costs', ['wages', 'mill', 'upkeep', 'water', 'invest', 'events'])}</div>
+    ${ledgerHTML(r.books)}
     <p><b>${t('rep.profit')} <span class="${r.profit < 0 ? 'neg' : ''}">${fmt.eur(r.profit)}</span></b><br>${t('rep.pressed', { l:r.litres })}${r.q ? t('rep.avgGrade', { grade:gradeOf(r.q) }) : ''}
       · ${r.medal ? t('rep.medal', { icon:MEDAL_ICON[r.medal], medal:r.medal }) : t('rep.noMedal')}</p>
     <table><tr>${['farm', 'picked', 'water', 'dryDays', 'health'].map(k => `<th>${t('rep.' + k)}</th>`).join('')}</tr>${r.farms.map(f =>

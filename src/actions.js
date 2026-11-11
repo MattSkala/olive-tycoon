@@ -7,11 +7,13 @@ import { t, fmt } from './i18n.js';
 import { $, float, floatAt, openPanel, closePanel, locked } from './hud.js';
 import { FARMS, CREW_MAX } from './config.js';
 import {
-  accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, prune, pruneCost, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
+  OBJECTIVES, accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, prune, pruneCost, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
 } from './rules.js';
 
 const select = i => { if (i >= 0) { app.sel = i; world.flyTo(i); } };
 const ripest = s => owned(s).filter(i => canPick(s, i)).sort((a, b) => s.farms[b].fruit - s.farms[a].fruit)[0]; // the pickable farm with the most fruit
+/** Takes the player to where something happens: a panel, or else a farm. Objectives, advice and news all point this way. */
+export const go = ({ farm = -1, panel } = {}) => { if (panel) ACTIONS.open(panel); else select(farm); };
 
 // An action that returns true has made its own sound.
 const ACTIONS = {
@@ -24,7 +26,9 @@ const ACTIONS = {
   desel: () => { app.sel = -1; },
   more: () => { $('card').classList.toggle('more'); }, // the phone card's Details
   thirst: () => select(thirsty(app.s)[0]),
-  advise: () => select(advice(app.s).farm),
+  advise: () => go(advice(app.s)),
+  goal: () => go(OBJECTIVES[app.s.goal]?.at(app.s)),
+  pickFarm: n => { closePanel(); select(+n); }, // a row in the groves panel
   water: (i = app.sel) => { // with nothing selected, the driest thirsty farm
     const s = app.s;
     i = i < 0 ? thirsty(s)[0] : +i;

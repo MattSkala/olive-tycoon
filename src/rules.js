@@ -5,7 +5,7 @@ import {
   DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, HOME_VALUE, OIL_VALUE, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, PICK, HAND_PICK, CREW_MAX,
   MILL_FEE, TREE_KG, UPGRADES, PRESS_QUALITY, BOTTLING_PRICE, SHAKER_SPEED, STAGE, DROP, GRADE_MIN, MEDALS, PRICE_HARVEST, PRICE_NORMAL, PRICE_MIN,
   MARKET_DEPTH, BUYERS, MAX_ORDERS, EVAP, RAINP, RAIN_GAIN, BAND_MIN, TRUCK, TRUCK_MIN, DRIP_RATE, DRIP_TO, GREEN_DAYS, GREEN_PRIZE, LEAGUE, FARMS,
-  DRIP_BASE, DRIP_SLOT, PRUNE_MONTHS, PRUNE_COST, PRUNE_MIN, PRUNE_HEALTH, CANOPY,
+  DRIP_BASE, DRIP_SLOT, RANK_MIN, PRUNE_MONTHS, PRUNE_COST, PRUNE_MIN, PRUNE_HEALTH, CANOPY,
 } from './config.js';
 
 // ---------- state ----------
@@ -95,11 +95,13 @@ export const waterCost = (s, i) => Math.max(TRUCK_MIN, TRUCK * trees(s.farms[i])
 export const buyBlock = (s, i) => s.farms[i].own ? 'owned' : s.rep < FARMS[i].rep ? 'rep' : canPay(s, FARMS[i].price, 'invest') ? '' : 'cash';
 /** Farms you qualify for, cheapest first. */
 export const forSale = s => FARMS.map((F, i) => i).filter(i => !s.farms[i].own && s.rep >= FARMS[i].rep).sort((a, b) => FARMS[a].price - FARMS[b].price);
-/** Estate value: cash, oil, land, trees and half of what drip and equipment cost. */
-export const worth = s => s.cash + OIL_VALUE * s.oil + sumOwned(s, (f, i) => (FARMS[i].price || HOME_VALUE) + f.mature * f.health + SAPLING * young(f) + (f.drip ? dripCost(i) / 2 : 0))
-  + Object.keys(s.up).reduce((a, k) => a + UPGRADES[k].cost / 2, 0);
+/** What the estate value is made of: cash, oil, land, trees, and half of what drip lines and equipment cost. */
+export const worthParts = s => ({ cash:s.cash, oil:OIL_VALUE * s.oil, land:sumOwned(s, (f, i) => FARMS[i].price || HOME_VALUE),
+  trees:sumOwned(s, f => f.mature * f.health + SAPLING * young(f)), drip:sumOwned(s, (f, i) => f.drip ? dripCost(i) / 2 : 0),
+  equipment:Object.keys(s.up).reduce((a, k) => a + UPGRADES[k].cost / 2, 0) });
+export const worth = s => total(worthParts(s));
 /** Rank index for an estate value, 0 = smallholder .. 4 = olive baron (names: lang `title.N`). */
-export const rankOf = w => w < 25000 ? 0 : w < 75000 ? 1 : w < 150000 ? 2 : w < GOAL ? 3 : 4;
+export const rankOf = w => RANK_MIN.findLastIndex(min => w >= min || !min);
 export const rate = (s, i) => PICK * (s.up.shakers ? SHAKER_SPEED : 1) * CANOPY[canopyOf(s.farms[i])].pick; // kg a picker picks on farm i in a month
 export const sellPrice = s => s.price * s.oilQ * (s.up.bottling ? BOTTLING_PRICE : 1) * (1 + s.rep / 200);
 const dip = (s, l) => Math.max(PRICE_MIN, s.price - l / MARKET_DEPTH); // market depth: a big lot pushes the price down, so big estates sell in slices
@@ -251,21 +253,24 @@ export function shoo(s) {
 }
 
 // ---------- objectives: a guided chain with rewards; the last one wins the game (texts: lang `goal.N`) ----------
+// `at` says where the objective is worked on, so the UI can take the player there: { farm } or { panel }.
+const fruitiest = s => owned(s).sort((a, b) => s.farms[b].fruit - s.farms[a].fruit)[0];
+const cheapest = s => ({ farm:FARMS.map((F, i) => i).filter(i => !s.farms[i].own).sort((a, b) => FARMS[a].price - FARMS[b].price)[0] ?? 0 }); // the next farm to buy
 export const OBJECTIVES = [
-  { prog:s => [s.watered, 1], cash:150 },
-  { done:s => s.pressed > 0, cash:200 },
-  { prog:s => [s.pressed, 300], cash:300 },
-  { prog:s => [s.sold, 300], cash:300 },
-  { prog:s => [s.delivered, 1], cash:500 },
-  { prog:s => [s.planted, 20], cash:400 },
-  { prog:s => [owned(s).length, 2], cash:750 },
-  { prog:s => [sumOwned(s, f => +f.drip), 1], cash:500 },
-  { prog:s => [s.green, 1], cash:1000 },
-  { prog:s => [s.rep, 30], cash:1000 },
-  { prog:s => [s.medals, 1], cash:2000 },
-  { prog:s => [matureAll(s), 150], cash:1500 },
-  { prog:s => [owned(s).length, 4], cash:2500 },
-  { prog:s => [Math.max(0, worth(s)), GOAL], cash:0 },
+  { prog:s => [s.watered, 1], cash:150, at:() => ({ farm:0 }) },
+  { done:s => s.pressed > 0, cash:200, at:s => ({ farm:fruitiest(s) }) },
+  { prog:s => [s.pressed, 300], cash:300, at:s => ({ farm:fruitiest(s) }) },
+  { prog:s => [s.sold, 300], cash:300, at:() => ({ panel:'sell' }) },
+  { prog:s => [s.delivered, 1], cash:500, at:() => ({ panel:'orders' }) },
+  { prog:s => [s.planted, 20], cash:400, at:s => ({ farm:owned(s).find(i => freeSlots(s, i) > 0) ?? 0 }) },
+  { prog:s => [owned(s).length, 2], cash:750, at:cheapest },
+  { prog:s => [sumOwned(s, f => +f.drip), 1], cash:500, at:s => ({ farm:owned(s).find(i => !s.farms[i].drip) ?? 0 }) },
+  { prog:s => [s.green, 1], cash:1000, at:() => ({ panel:'farms' }) },
+  { prog:s => [s.rep, 30], cash:1000, at:() => ({ panel:'fame' }) },
+  { prog:s => [s.medals, 1], cash:2000, at:() => ({ panel:'fame' }) },
+  { prog:s => [matureAll(s), 150], cash:1500, at:() => ({ panel:'farms' }) },
+  { prog:s => [owned(s).length, 4], cash:2500, at:cheapest },
+  { prog:s => [Math.max(0, worth(s)), GOAL], cash:0, at:() => ({ panel:'estate' }) },
 ];
 const goalDone = (s, o) => o.done ? o.done(s) : o.prog(s)[0] >= o.prog(s)[1];
 export function checkGoals(s) {
@@ -277,25 +282,26 @@ export function checkGoals(s) {
 }
 
 // ---------- advisor: one line of what to do next; the first matching rule wins ----------
-/** Returns { key, params, farm }: a message key and the farm it is about (-1 if none). */
+/** Returns { key, params, farm, panel }: a message key, and where to act on it: a farm (-1 if none) or a panel. */
 export function advice(s) {
-  const m = s.month, own = owned(s), tell = (key, params = {}, farm = -1) => ({ key, params, farm });
+  const m = s.month, own = owned(s), tell = (key, params = {}, farm = -1, panel) => ({ key, params, farm, panel });
   let i, o;
   const reserve = 3000 + 6 * upkeep(s); // a flat 3,000 did not cover a summer of upkeep on a big estate
-  if (s.cash < 0 && s.oil >= 1) return tell('adv.overdrawnSell', { limit:-OVERDRAFT });
+  if (s.cash < 0 && s.oil >= 1) return tell('adv.overdrawnSell', { limit:-OVERDRAFT }, -1, 'sell');
   if (s.goats) return tell('adv.goats', { farm:FARMS[s.goats.farm].name }, s.goats.farm);
   if (m >= 3 && m <= 8 && (i = thirsty(s)[0]) >= 0) return tell('adv.thirsty', { farm:FARMS[i].name, band:band(s.farms[i].moist), cost:waterCost(s, i) }, i);
   if (m >= 4 && m <= 8 && (i = undripped(s).find(i => farmStatus(s, i).daysLeft <= 5)) >= 0) return tell('adv.dryIn', { farm:FARMS[i].name, n:farmStatus(s, i).daysLeft }, i);
-  if (o = s.orders.find(o => o.months < 1 && !canDeliver(s, o))) return tell('adv.orderDue', { buyer:o.buyer, l:o.litres, grade:gradeOf(o.minQ) });
+  if (o = s.orders.find(o => o.months < 1 && !canDeliver(s, o))) return tell('adv.orderDue', { buyer:o.buyer, l:o.litres, grade:gradeOf(o.minQ) }, -1, 'orders');
   if (!crewTotal(s) && (i = own.filter(i => canPick(s, i)).sort((a, b) => s.farms[b].fruit - s.farms[a].fruit)[0]) >= 0)
     return tell('adv.pick', { farm:FARMS[i].name, kg:s.farms[i].fruit, stage:stageOf(s, i).name }, i);
-  if (s.cash < 0) return tell('adv.overdrawnEmpty', { limit:-OVERDRAFT });
+  if (s.cash < 0) return tell('adv.overdrawnEmpty', { limit:-OVERDRAFT }, -1, 'money');
   if (PRUNE_MONTHS.includes(m) && (i = own.find(i => canopyOf(s.farms[i]) !== 'tidy' && !pruneBlock(s, i) && s.cash >= pruneCost(s, i) + 1000)) >= 0)
     return tell('adv.prune', { farm:FARMS[i].name, cost:pruneCost(s, i) }, i);
   if ((m >= 9 || m <= 2) && s.cash >= reserve && (i = own.find(i => freeSlots(s, i) >= 10)) >= 0) return tell('adv.plant', { farm:FARMS[i].name }, i);
   if ((i = forSale(s)[0]) >= 0 && s.cash >= FARMS[i].price + reserve) return tell('adv.afford', { farm:FARMS[i].name, price:FARMS[i].price }, i);
   if ((i = own.find(i => trees(s.farms[i]) >= 30 && !s.farms[i].drip && s.cash >= dripCost(i) + reserve)) >= 0) return tell('adv.drip', { farm:FARMS[i].name, cost:dripCost(i) }, i);
-  return tell((m >= 9 || m === 0) && fruitAll(s) >= 1 ? 'adv.harvest' : m >= 9 || m <= 3 ? 'adv.quiet' : 'adv.growing');
+  if ((m >= 9 || m === 0) && fruitAll(s) >= 1) return tell('adv.harvest', {}, fruitiest(s));
+  return m >= 9 || m <= 3 ? tell('adv.quiet', {}, -1, 'sell') : tell('adv.growing', {}, -1, 'farms');
 }
 
 // ---------- the clock ----------

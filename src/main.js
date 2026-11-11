@@ -8,7 +8,8 @@ import { sfx } from './audio.js';
 import { world, renderer, scene, camera, controls, fit } from './world.js';
 import { t, setLang, detectLang } from './i18n.js';
 import { $, toast, initHud, refresh, viewOf, openPanel, showEnd } from './hud.js';
-import { bindInput } from './actions.js';
+import { bindInput, go } from './actions.js';
+import { FARMS } from './config.js';
 import { listen, stepDay } from './rules.js';
 
 const DAY_SEC = 1.05; // real seconds per game day at 1x: a month takes about half a minute
@@ -19,8 +20,10 @@ initHud();
 bindInput();
 
 // news from the rules becomes a toast; bad news slows the clock (lastSpeed is kept, so Space twice or a speed key restores it)
+const NEWS_PANEL = { 'say.offer':'orders', 'say.orderMissed':'orders', 'say.delivered':'orders', 'say.sold':'sell', 'say.medal':'fame', 'say.noMedal':'fame', 'say.greenThumb':'fame',
+  'say.bankSold':'money', 'say.crewUnpaid':'money', 'say.dripUnpaid':'money', 'say.matured':'farms', 'say.rotted':'farms', 'say.harvestOpen':'farms' };
 listen((key, params, kind) => {
-  toast(t(key, params), kind);
+  toast(t(key, params), kind, () => go({ panel:NEWS_PANEL[key], farm:FARMS.findIndex(F => F.name === params.farm) })); // a tap goes to the panel or farm the news is about
   if (kind === 'good') sfx.fanfare();
   if (kind === 'warn') { sfx.warn(); if (app.speed > 1) app.speed = 1; }
 });

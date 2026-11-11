@@ -3,6 +3,7 @@
 
 export const DAYS = 30; // days in a game month
 export const GOAL = 250000; // estate value that completes the last objective
+export const RANK_MIN = [0, 25000, 75000, 150000, GOAL]; // estate value at which each rank starts (names: lang `title.0` .. `title.4`)
 
 // ---- economy
 export const START_CASH = 5000;

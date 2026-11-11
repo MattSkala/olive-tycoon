@@ -26,15 +26,15 @@
 
 <div id="hud" hidden>
   <div id="top">
-    <div class="card" id="estate" data-i18n-title="top.worthTip">
+    <div class="card" id="estate" role="button" data-a="open" data-n="estate" data-i18n-title="top.worthTip">
       <div class="badge"><small data-i18n="top.rank"></small><b id="rankN"></b></div>
       <div class="grow"><b id="rankT"></b><div class="bar"><i id="goalBar"></i></div><small id="worthL"></small></div>
     </div>
     <div id="res">
-      <div class="res"><i class="ic gold">€</i><div><b id="cashV"></b><small data-i18n="top.cash"></small></div></div>
-      <div class="res"><i class="ic green">🫒</i><div><b id="fruitV"></b><small id="crewNote"></small></div></div>
-      <div class="res"><i class="ic yellow">💧</i><div><b id="oilV"></b><small id="oilG"></small></div></div>
-      <div class="res" data-i18n-title="top.repTip"><i class="ic teal">★</i><div><b id="repV"></b><small data-i18n="top.rep"></small></div></div>
+      <div class="res" role="button" data-a="open" data-n="money"><i class="ic gold">€</i><div><b id="cashV"></b><small data-i18n="top.cash"></small></div></div>
+      <div class="res" role="button" data-a="open" data-n="farms"><i class="ic green">🫒</i><div><b id="fruitV"></b><small id="crewNote"></small></div></div>
+      <div class="res" role="button" data-a="open" data-n="sell"><i class="ic yellow">💧</i><div><b id="oilV"></b><small id="oilG"></small></div></div>
+      <div class="res" role="button" data-a="open" data-n="fame" data-i18n-title="top.repTip"><i class="ic teal">★</i><div><b id="repV"></b><small data-i18n="top.rep"></small></div></div>
     </div>
     <div id="tools">
       <button class="tool" id="thirst" data-a="thirst">🚰<em class="dot" id="thirstN"></em></button>
@@ -47,9 +47,9 @@
     <div id="left">
       <div class="card" id="goal">
         <h3 data-i18n="goal.head"></h3>
-        <div class="task"><span id="goalT"></span><span class="chip2" id="goalR"></span></div>
+        <div class="task" role="button" data-a="goal" data-i18n-title="goal.tip"><span id="goalT"></span><span class="chip2" id="goalR"></span><b class="go">›</b></div>
         <div class="bar"><i id="goalP"></i></div>
-        <button id="adv" data-a="advise" data-i18n-title="top.advTip"><span id="advT"></span></button>
+        <button id="adv" data-a="advise" data-i18n-title="top.advTip"><span id="advT"></span> <b class="go">›</b></button>
       </div>
       <div class="card" id="list"></div>
     </div>
@@ -89,7 +89,7 @@
   </div>
   <div id="bottom">
     <div class="card" id="season">
-      <div><b id="date"></b><div class="bar"><i id="dayBar"></i></div></div>
+      <div role="button" data-a="open" data-n="calendar"><b id="date"></b><div class="bar"><i id="dayBar"></i></div></div>
       <div class="seg" id="speed">
         <button data-a="speed" data-n="0" data-i18n-title="speed.pause">⏸</button><button data-a="speed" data-n="1" data-i18n-title="speed.1">1×</button><button data-a="speed" data-n="3" data-i18n-title="speed.2">3×</button><button data-a="speed" data-n="10" data-i18n-title="speed.3">10×</button>
       </div>
@@ -102,8 +102,8 @@
       <button class="tile" data-a="open" data-n="sell" id="sellTile"><i>🛒</i><span data-i18n="market.tile"></span></button>
     </div>
     <div class="card" id="market">
-      <div class="top"><b data-i18n="market.head"></b><span class="chip2" id="priceD" data-i18n-title="market.change"></span></div>
-      <div><b id="priceV"></b> <small data-i18n="market.perLitre"></small></div>
+      <div role="button" data-a="open" data-n="sell"><div class="top"><b data-i18n="market.head"></b><span class="chip2" id="priceD" data-i18n-title="market.change"></span></div>
+      <div><b id="priceV"></b> <small data-i18n="market.perLitre"></small></div></div>
       <div id="bars"></div>
       <button id="sellBtn" data-a="open" data-n="sell"></button>
     </div>
