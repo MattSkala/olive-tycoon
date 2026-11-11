@@ -186,7 +186,7 @@ export default {
   'help.sellHtml':'<b>Prodávej</b> na trhu po částech, protože velká dávka srazí cenu, nebo ber <b>zakázky</b> z vesnice: platí mnohem víc, ale chtějí určitou třídu a mají termín. <b>Pověst</b> zvyšuje všechny tvoje ceny a odemyká lepší farmy.',
   'help.touchHtml':'Dotyk: tažením se pohybuješ, dvěma prsty přibližuješ a otáčíš. Klepnutím na pozemek ho vybereš, klepáním na zralé stromy sklízíš, klepnutím na prázdnou zem zavřeš kartu farmy.',
   'help.keysHtml':'Tažením otáčíš, kolečkem přibližuješ, šipkami posouváš. Klávesy: <kbd>mezerník</kbd> pauza, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> rychlost, <kbd>Tab</kbd> další farma, <kbd>W</kbd> zalít, <kbd>P</kbd> zasadit 10, <kbd>+</kbd> <kbd>−</kbd> česáči, <kbd>V</kbd> mapa vláhy, <kbd>S</kbd> prodej, <kbd>C</kbd> zakázky, <kbd>I</kbd> investice, <kbd>R</kbd> výkaz, <kbd>M</kbd> zvuk, <kbd>Esc</kbd> zavřít, zrušit výběr, pak oddálit.',
-  'sound.title':'🔊 Zvuk', 'sound.music':'Hudba', 'sound.musicNote':'Hudba na pozadí v krétském stylu, vytvořená modelem Google Lyria', 'sound.sfx':'Zvukové efekty', 'sound.sfxNote':'Kliknutí, mince, voda, nůžky a kozy',
+  'sound.title':'🔊 Zvuk', 'sound.music':'Hudba', 'sound.musicNote':'Hudba na pozadí v krétském stylu', 'sound.sfx':'Zvukové efekty', 'sound.sfxNote':'Kliknutí, mince, voda, nůžky a kozy',
   'sound.on':'Zap.', 'sound.off':'Vyp.',
   'confirm.new':'Opustit tenhle statek a začít znovu?',
 

@@ -191,7 +191,7 @@ export default {
   'help.sellHtml':'<b>Sell</b> on the market in slices, since big lots push the price down, or take <b>contracts</b> from the village: they pay much more but demand a grade and a deadline. <b>Reputation</b> raises all your prices and unlocks the better farms.',
   'help.touchHtml':'Touch: drag to move around, pinch to zoom, twist two fingers to rotate. Tap a plot to select it, tap ripe trees to pick them, tap empty ground to close the farm card.',
   'help.keysHtml':'Drag to rotate, scroll to zoom, arrow keys to pan. Keys: <kbd>Space</kbd> pause, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> speed, <kbd>Tab</kbd> next farm, <kbd>W</kbd> water, <kbd>P</kbd> plant 10, <kbd>+</kbd> <kbd>−</kbd> pickers, <kbd>V</kbd> water view, <kbd>S</kbd> sell, <kbd>C</kbd> contracts, <kbd>I</kbd> invest, <kbd>R</kbd> report, <kbd>M</kbd> sound, <kbd>Esc</kbd> close, deselect, then zoom out.',
-  'sound.title':'🔊 Sound', 'sound.music':'Music', 'sound.musicNote':'Cretan-style background music, generated with Google Lyria', 'sound.sfx':'Sound effects', 'sound.sfxNote':'Clicks, coins, water, shears and the goats',
+  'sound.title':'🔊 Sound', 'sound.music':'Music', 'sound.musicNote':'Cretan-style background music', 'sound.sfx':'Sound effects', 'sound.sfxNote':'Clicks, coins, water, shears and the goats',
   'sound.on':'On', 'sound.off':'Off',
   'confirm.new':'Abandon this estate and start over?',
 
