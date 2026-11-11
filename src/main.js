@@ -11,7 +11,7 @@ import { $, toast, initHud, refresh, viewOf, openPanel, showEnd } from './hud.js
 import { bindInput } from './actions.js';
 import { listen, stepDay } from './rules.js';
 
-const DAY_SEC = .35; // real seconds per game day at 1x
+const DAY_SEC = 1.05; // real seconds per game day at 1x: a month takes about half a minute
 
 setLang(detectLang());
 load();
