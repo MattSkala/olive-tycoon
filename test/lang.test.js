@@ -1,7 +1,7 @@
 // Checks every language file against English: no unknown keys, no missing keys, same placeholders, complete plural forms.
 import { LANGS } from '../src/i18n.js';
 
-const NEUTRAL = ['goal.progress', 'adv.line', 'ev.optCost', 'card.why']; // pure patterns, the same in every language
+const NEUTRAL = ['goal.progress', 'card.whyNot', 'adv.line', 'ev.optCost', 'card.why']; // pure patterns, the same in every language
 const en = LANGS.en, problems = [];
 const forms = v => typeof v === 'string' ? [v] : Array.isArray(v) ? v : Object.values(v);
 const holes = v => new Set(forms(v).flatMap(s => s.match(/\{\w+/g) || []));

@@ -77,20 +77,30 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 .toast.warn { background:#ffe0d4; border-color:var(--red); } .toast.good { background:#eef4c8; }
 @keyframes pop { from { transform:translateY(-8px); opacity:0; } }
 
-#card { width:312px; max-height:100%; overflow:auto; position:relative; padding:0; }
-#card header { background:var(--olive-d); color:var(--cream); padding:9px 12px 10px; }
+/* the farm card: header, one-line facts that scroll if they must, and the actions pinned at the bottom so they are always in reach */
+#card { width:312px; max-height:100%; position:relative; padding:0; overflow:hidden; display:flex; flex-direction:column; }
+#card header { flex:none; background:var(--olive-d); color:var(--cream); padding:8px 12px 9px; }
 #card header small { color:#d8dfbd; }
 #card .x { position:absolute; top:5px; right:5px; color:var(--cream); }
 #cName { font-size:19px; } #cMore, .touchonly { display:none; }
-#cTraits span { display:inline-block; background:rgba(255,255,255,.16); border-radius:8px; padding:1px 7px; font-size:12px; margin:5px 4px 0 0; }
+#cTraits span { display:inline-block; background:rgba(255,255,255,.16); border-radius:8px; padding:1px 7px; font-size:12px; margin:4px 4px 0 0; }
 #cTraits .pos { color:#c9dd5a; } #cTraits .neg { color:#ffab8f; }
-#cOwn, #cSale { padding:4px 12px 12px; }
-.kv { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:9px; }
-.kv > :first-child { color:var(--muted); }
-#cCrew { display:inline-block; min-width:22px; text-align:center; font-size:18px; font-weight:700; }
+#cOwn { flex:1; min-height:0; display:flex; flex-direction:column; }
+#cStats { flex:1 1 auto; min-height:0; overflow:auto; padding:3px 12px 8px; }
+#cStats small { font-size:11.5px; line-height:1.25; }
+.stat { display:flex; align-items:center; gap:8px; margin-top:7px; }
+.stat > span:first-child { color:var(--muted); flex:none; min-width:3.6em; }
+.stat .bar { flex:1; margin:0; } .stat > b, .stat > em { margin-left:auto; font-style:normal; text-align:right; }
+#cActs { flex:none; padding:0 10px 10px; border-top:1.5px solid #e3d9b9; }
+#card:not(.pick) #cCrewRow { display:none; } /* the picking crew shows while there is fruit to pick */
+#cCrewRow small { flex:1; min-width:0; font-size:11px; line-height:1.2; } .stepper { flex:none; white-space:nowrap; }
+#cCrew { display:inline-block; min-width:20px; text-align:center; font-size:18px; font-weight:700; }
 #crewMax { padding:5px 9px; }
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:12px; }
-.grid2 button { font-size:13px; padding:7px 6px; min-height:50px; } .grid2 .wide { grid-column:1 / -1; min-height:0; } #cWaterNote, #cRipe { min-height:2.8em; } /* room for two lines, so a wrapping note or label never moves a button under the cursor */
+.acts { display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; margin-top:9px; }
+.acts button { padding:5px 1px 4px; display:flex; flex-direction:column; align-items:center; line-height:1.15; font-size:11.5px; font-weight:500; min-width:0; }
+.acts button i { font-style:normal; font-size:17px; } .acts button b { font-size:12px; white-space:nowrap; }
+.acts button[aria-disabled=true] { background:#c9c4ab; color:#6f6c58; box-shadow:0 3px 0 #a9a58d; } .acts button[aria-disabled=true] i { filter:grayscale(1); opacity:.7; }
+#cSale { padding:4px 12px 12px; }
 #cBuy { width:100%; margin-top:10px; font-size:15px; }
 
 /* ---- bottom: season and speed, the action dock, the oil market */
@@ -158,10 +168,9 @@ kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; 
   #hud { gap:6px; padding:max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); }
   #list, #goal h3 { display:none; }
   .card { border-radius:14px; }
-  #card header { padding:0 12px 4px; } #cName { display:block; line-height:40px; } #card .x { height:40px; min-height:0; top:0; } #card #cMore { display:block; right:44px; font-size:13px; text-decoration:underline; }
-  #card:not(.more) .xtra, #card:not(.more):not(.pick) #cCrewRow, #card:not(.more):not(.season) #cPrune { display:none; } /* crew and pruning show in their seasons */
-  #cOwn { display:flex; flex-direction:column; } .soil { order:-3; } #cCrewRow, #cCrewNote { order:-2; } #cOwn .grid2 { order:-1; }
-  #cWaterNote, #cRipe { min-height:0; } .kv { margin-top:5px; } .grid2 { margin-top:8px; }
+  #card header { padding:0 12px 2px; } #cName { display:block; line-height:36px; } #card .x { height:36px; min-height:0; top:0; } #card #cMore { display:block; right:44px; font-size:13px; text-decoration:underline; }
+  #card:not(.more) .xtra { display:none; }
+  #cStats { padding:0 12px 6px; } .stat { margin-top:5px; } .acts { margin-top:7px; } #cActs { padding:0 8px 8px; }
 }
 @media (max-height:520px) and (min-width:701px) { /* a phone on its side: wide but short */
   #estate .badge { width:38px; height:38px; } .ic { width:28px; height:28px; font-size:14px; } .res small { display:none; } .tool { width:38px; height:38px; }
@@ -176,23 +185,23 @@ kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; 
   .res { padding:2px 9px 2px 2px; gap:5px; min-width:0; box-shadow:0 3px 0 rgba(47,58,26,.4); } .res small { display:none; } .res b { font-size:13px; overflow:hidden; text-overflow:ellipsis; }
   .ic { width:26px; height:26px; font-size:13px; }
   #mid { flex-direction:column; align-items:stretch; } #left { width:auto; }
-  #goal { padding:6px 8px 7px; } .task { font-size:12.5px; padding:5px 8px; } #adv { font-size:12.5px; margin-top:5px; }
-  #goalT, #advT { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
-  #card { width:auto; max-height:70%; }
+  #goal { padding:5px 7px 5px; } .task { font-size:12.5px; padding:4px 8px; } #goal .bar { height:5px; margin-top:4px; } #adv { font-size:12.5px; margin-top:4px; }
+  #goalT { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; } #advT { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } /* the advice is one line: a tap goes there anyway */
+  #card { width:auto; max-height:70%; } #card.more { max-height:100%; } #hud:has(#card.more:not([hidden])) #left { display:none; } /* Details borrows the objective card's room */
   .toast { font-size:13px; padding:5px 11px; border-radius:14px; } .toast:nth-last-child(n+3) { display:none; }
   #bottom { display:grid; grid-template-columns:1fr; gap:6px; align-items:stretch; }
   #market { display:none; } #sellTile { display:flex; }
   #season { width:auto; display:flex; align-items:center; gap:10px; padding:5px 6px 5px 10px; } #season > div:first-child { flex:1; min-width:0; } #date { font-size:13.5px; white-space:nowrap; } .seg { margin:0; flex:none; } .seg button { padding:5px 9px; }
   #dock { display:grid; grid-template-columns:auto repeat(4, 1fr); gap:6px; }
-  #harvestBtn { width:74px; height:74px; } #harvestBtn span { font-size:19px; } #harvestBtn b { font-size:11.5px; } #harvestBtn small { font-size:10px; }
-  .tile { width:auto; height:70px; font-size:11.5px; gap:3px; border-radius:14px; } .tile i { width:32px; height:32px; font-size:16px; border-radius:10px; }
+  #harvestBtn { width:66px; height:66px; } #harvestBtn span { font-size:17px; } #harvestBtn b { font-size:10.5px; } #harvestBtn small { font-size:9.5px; }
+  .tile { width:auto; height:60px; font-size:11px; gap:2px; border-radius:14px; padding:4px 2px; } .tile i { width:28px; height:28px; font-size:14px; border-radius:9px; }
   .chip { font-size:12px; } .chip > span:nth-child(3), .chip:not(.alert) button { display:none; } .chip:not(.alert) { padding-right:11px; } /* name and moisture bar; a thirsty farm also gets its water button, the card has the rest */
   #modal { padding:0; padding-bottom:env(safe-area-inset-bottom); place-items:end stretch; }
   #modal section { width:100%; max-height:88vh; max-height:88dvh; border-radius:20px 20px 0 0; border-bottom:0; padding:16px 14px 20px; }
   .cols { grid-template-columns:1fr; } #modal .row button { flex:1; }
 }
 @media (pointer:coarse) { /* fingers need bigger targets than a mouse pointer */
-  button, .grid2 button { min-height:44px; } button.round { width:44px; height:44px; }
+  button { min-height:44px; } button.round { width:40px; height:40px; min-height:40px; }
   .seg button { min-height:36px; min-width:38px; } .chip { min-height:38px; } .chip button { min-height:32px; padding:3px 11px; font-size:13px; }
   .frow { padding:9px 8px; } #modal .x { min-width:44px; }
   .touchonly { display:block; } .keysonly { display:none; }

@@ -4,7 +4,7 @@ import { app, save, setSpeed, restart } from './state.js';
 import { audio, tone, sfx } from './audio.js';
 import { world, canvas } from './world.js';
 import { t, fmt } from './i18n.js';
-import { $, float, floatAt, openPanel, closePanel, locked } from './hud.js';
+import { $, float, floatAt, toast, openPanel, closePanel, locked } from './hud.js';
 import { FARMS, CREW_MAX } from './config.js';
 import {
   OBJECTIVES, accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, prune, pruneCost, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
@@ -100,7 +100,9 @@ export function bindInput() {
   document.addEventListener('click', e => {
     if (e.target === $('modal') && !locked()) return closePanel();
     const b = e.target.closest('[data-a]');
-    if (b && !b.disabled) act(b.dataset.a, b.dataset.n);
+    if (!b || b.disabled) return;
+    if (b.dataset.why) return toast(b.dataset.why, 'info'); // a greyed action on the farm card says why
+    act(b.dataset.a, b.dataset.n);
   });
   document.addEventListener('keydown', onKey);
   canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });

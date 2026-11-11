@@ -5,7 +5,7 @@ import { audio } from './audio.js';
 import { world } from './world.js';
 import { t, fmt, monthName, LANGS, getLang, setLang, translatePage } from './i18n.js';
 import { DETAILS, SEASON, ledgerHTML } from './details.js';
-import { DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, CREW_MAX, UPGRADES, MAX_ORDERS, FARMS, CANOPY, PRUNE_MONTHS } from './config.js';
+import { DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, CREW_MAX, UPGRADES, MAX_ORDERS, FARMS, CANOPY } from './config.js';
 import {
   OBJECTIVES, advice, buyBlock, canDeliver, canPay, canPick, canopyOf, crewTotal, pruneBlock, pruneCost, dripCost, eventView, farmStatus, freeSlots, fruitAll, fruitFrac, gradeOf, growth,
   matureAll, owned, pickQ, rankOf, rate, sellPrice, sellValue, slots, stageOf, thirsty, trees, upkeep, waterCost, worth, young,
@@ -20,6 +20,14 @@ const setHTML = (id, h) => { if (htmlCache[id] !== h) $(id).innerHTML = htmlCach
 const fill = (e, x, c = '') => { prop(e.style, 'width', Math.round(Math.max(0, Math.min(100, x))) + '%'); prop(e, 'className', c); }; // a bar and its colour class
 const btn = (id, label, why) => { T(id, why ? t('card.why', { label, why }) : label); prop($(id), 'disabled', !!why); }; // a disabled button says why
 const cap = w => w[0].toUpperCase() + w.slice(1);
+// A compact action button on the farm card: icon, word and price. One that cannot act now stays tappable but greyed, and a tap says why (see actions.js),
+// which keeps the reason off the button so five of them fit in a row.
+function action(id, price, why) {
+  const b = $(id);
+  set(b.children[2], price);
+  prop(b.dataset, 'why', why ? t('card.whyNot', { label:b.children[1].textContent, why:t('why.' + why) }) : '');
+  if (b.getAttribute('aria-disabled') !== String(!!why)) b.setAttribute('aria-disabled', !!why);
+}
 
 const MEDAL_ICON = { gold:'🥇', silver:'🥈', bronze:'🥉' };
 const PAGE = { goal:GOAL, start:START_CASH, limit:-OVERDRAFT }; // the numbers quoted by static texts
@@ -94,7 +102,6 @@ export function initHud() {
 }
 
 // ---------- refresh ----------
-const whyNot = code => code && t('why.' + code);
 const short = (c, cat) => canPay(app.s, c, cat) ? '' : 'cash';
 const waterWhy = i => !trees(app.s.farms[i]) ? 'noTrees' : app.s.farms[i].moist >= 95 ? 'wet' : short(waterCost(app.s, i));
 const dryIn = st => !st.daysLeft ? t('dry.now', { band:st.band }) : st.auto ? t('dry.drip') : st.daysLeft > 60 ? t('dry.none') : t('dry.in', { n:st.daysLeft });
@@ -163,7 +170,7 @@ function refreshCard(s) {
   setHTML('cTraits', `<span>${t('soil.' + F.soil)}</span>` + [['Fruit', F.fruit, 1], ['Drain', F.drain, -1], ['Q', F.q, 1]].map(([k, x, good]) =>
     `<span class="${x === 1 ? '' : (x - 1) * good > 0 ? 'pos' : 'neg'}">${t('card.trait' + k, { x })}</span>`).join('')
     + (F.late ? `<span>${t('card.traitLate')}</span>` : '') + `<span>${t('card.traitSlots', { n:slots(i) })}</span>`);
-  hide($('cOwn'), !f.own); hide($('cSale'), f.own); $('card').classList.toggle('pick', pk); $('card').classList.toggle('season', PRUNE_MONTHS.includes(s.month));
+  hide($('cOwn'), !f.own); hide($('cSale'), f.own); $('card').classList.toggle('pick', pk);
   if (!f.own) {
     const block = buyBlock(s, i);
     T('cStands', t('card.stands', { stands:F.old ? t('card.standsTrees', { n:F.old, health:F.oldHealth / 100 }) : t('card.standsBare'), slots:slots(i), cost:dripCost(i) }));
@@ -183,11 +190,12 @@ function refreshCard(s) {
   T('cCrew', String(f.crew));
   T('cCrewNote', pk ? t('card.crewNote', { wage:WAGE, rate:Math.round(rate(s, i)) }) : '');
   $('crewMinus').disabled = !f.crew; $('crewPlus').disabled = $('crewMax').disabled = !pk || f.crew >= CREW_MAX;
-  btn('cWater', t('card.water', { cost:waterCost(s, i) }), whyNot(waterWhy(i)));
-  btn('cDrip', f.drip ? t('card.dripDone') : t('card.drip', { cost:dripCost(i) }), whyNot(f.drip ? 'installed' : short(dripCost(i), 'invest')));
-  btn('cPlant', t('card.plant', { n:n || 10, cost:(n || 10) * SAPLING }), whyNot(!free ? 'noSlots' : short(n * SAPLING, 'invest')));
-  btn('cPrune', t('card.prune', { cost:pruneCost(s, i) }), whyNot(pruneBlock(s, i)));
-  btn('cFill', t('card.fill', { n:free, cost:free * SAPLING }), whyNot(!free ? 'full' : short(free * SAPLING, 'invest')));
+  action('cWater', fmt.eur(waterCost(s, i)), waterWhy(i));
+  action('cDrip', f.drip ? '✓' : fmt.eur(dripCost(i)), f.drip ? 'installed' : short(dripCost(i), 'invest'));
+  set($('cPlant').children[1], '+' + (n || 10));
+  action('cPlant', fmt.eur((n || 10) * SAPLING), !free ? 'noSlots' : short(n * SAPLING, 'invest'));
+  action('cFill', fmt.eur(free * SAPLING), !free ? 'full' : short(free * SAPLING, 'invest'));
+  action('cPrune', fmt.eur(pruneCost(s, i)), pruneBlock(s, i));
 }
 
 function refreshBottom(s, frac) {

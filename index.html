@@ -62,23 +62,28 @@
         <div id="cTraits" class="xtra"></div>
       </header>
       <div id="cOwn">
-        <div class="kv xtra"><span data-i18n="card.treesL"></span><span id="cTrees"></span></div>
-        <div class="kv soil"><span data-i18n="card.soilL"></span><b id="cBand"></b></div>
-        <div class="bar soil"><i id="cMoist"></i></div><small id="cWaterNote" class="soil"></small>
-        <div class="kv xtra"><span data-i18n="card.healthL"></span><b id="cHealthV"></b></div>
-        <div class="bar xtra"><i id="cHealth"></i></div>
-        <div class="kv xtra"><span data-i18n="card.canopyL"></span><b id="cCanopy"></b></div><small id="cCanopyNote" class="xtra"></small>
-        <div class="kv xtra"><span data-i18n="card.fruitL"></span><b id="cFruit"></b></div><small id="cRipe" class="xtra"></small>
-        <div class="kv" id="cCrewRow"><span data-i18n="card.pickersL"></span><span>
-          <button class="round" id="crewMinus" data-a="crew" data-n="-1" data-i18n-aria="card.fewer">−</button>
-          <span id="cCrew">0</span>
-          <button class="round" id="crewPlus" data-a="crew" data-n="1" data-i18n-aria="card.more">+</button>
-          <button id="crewMax" data-a="crew" data-n="99" data-i18n="card.max"></button>
-        </span></div><small id="cCrewNote" class="xtra"></small>
-        <div class="grid2">
-          <button class="blue" id="cWater" data-a="water" data-i18n-title="card.keyW"></button><button class="blue" id="cDrip" data-a="drip"></button>
-          <button id="cPlant" data-a="plant" data-n="10" data-i18n-title="card.keyP"></button><button id="cFill" data-a="plant" data-n="999"></button>
-          <button class="wide" id="cPrune" data-a="prune"></button>
+        <div id="cStats"><!-- one line per fact; scrolls if the window is short -->
+          <div class="stat soil"><span data-i18n="card.soilL"></span><div class="bar"><i id="cMoist"></i></div><b id="cBand"></b></div>
+          <small id="cWaterNote" class="soil"></small>
+          <div class="stat xtra"><span data-i18n="card.healthL"></span><div class="bar"><i id="cHealth"></i></div><b id="cHealthV"></b></div>
+          <div class="stat xtra"><span data-i18n="card.canopyL"></span><b id="cCanopy"></b></div><small id="cCanopyNote" class="xtra"></small>
+          <div class="stat xtra"><span data-i18n="card.fruitL"></span><b id="cFruit"></b></div><small id="cRipe" class="xtra"></small>
+          <div class="stat xtra"><span data-i18n="card.treesL"></span><em id="cTrees"></em></div>
+        </div>
+        <div id="cActs"><!-- always in view: the picking crew (in season) and the five things you can do to a farm -->
+          <div class="stat" id="cCrewRow" data-i18n-title="card.crewTip"><span data-i18n="card.pickersL"></span><small id="cCrewNote"></small><span class="stepper">
+            <button class="round" id="crewMinus" data-a="crew" data-n="-1" data-i18n-aria="card.fewer">−</button>
+            <span id="cCrew">0</span>
+            <button class="round" id="crewPlus" data-a="crew" data-n="1" data-i18n-aria="card.more">+</button>
+            <button id="crewMax" data-a="crew" data-n="99" data-i18n="card.max"></button>
+          </span></div>
+          <div class="acts">
+            <button class="blue" id="cWater" data-a="water" data-i18n-title="card.keyW"><i>💧</i><span data-i18n="card.bWater"></span><b></b></button>
+            <button class="blue" id="cDrip" data-a="drip"><i>🚿</i><span data-i18n="card.bDrip"></span><b></b></button>
+            <button id="cPlant" data-a="plant" data-n="10" data-i18n-title="card.keyP"><i>🌱</i><span></span><b></b></button>
+            <button id="cFill" data-a="plant" data-n="999"><i>🌳</i><span data-i18n="card.bFill"></span><b></b></button>
+            <button id="cPrune" data-a="prune"><i>✂️</i><span data-i18n="card.bPrune"></span><b></b></button>
+          </div>
         </div>
       </div>
       <div id="cSale">

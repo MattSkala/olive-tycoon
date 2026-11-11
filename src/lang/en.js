@@ -133,10 +133,12 @@ export default {
   'canopy.tidy':'tidy', 'canopy.grown':'grown out', 'canopy.wild':'overgrown',
   'canopy.tidyNote':'{fruit:pct} more fruit, picking {pick:pct} faster', 'canopy.grownNote':'due for pruning', 'canopy.wildNote':'{fruit:pct} less fruit, picking {pick:pct} slower',
   'card.canopyL':'Canopy', 'card.prunedNow':'pruned this year', 'card.pruned':{ one:'pruned {n} year ago', other:'pruned {n} years ago' },
-  'card.prune':'✂️ Prune · {cost:eur}',
+
   'card.close':'Close', 'card.details':'Details', 'card.detailsTip':'Show or hide the farm details',
-  'card.treesL':'Trees', 'card.soilL':'Soil', 'card.healthL':'Tree health', 'card.fruitL':'Fruit', 'card.pickersL':'Pickers',
-  'card.fewer':'Fewer pickers', 'card.more':'More pickers', 'card.max':'Max', 'card.keyW':'Key W', 'card.keyP':'Key P',
+  'card.bWater':'Water', 'card.bDrip':'Drip', 'card.bFill':'Fill', 'card.bPrune':'Prune', 'card.keyW':'Send the water truck (key W)', 'card.keyP':'Plant 10 saplings (key P)',
+  'card.whyNot':'{label}: {why}.', 'card.crewTip':'Pickers work this farm until it is stripped',
+  'card.treesL':'Trees', 'card.soilL':'Soil', 'card.healthL':'Health', 'card.fruitL':'Fruit', 'card.pickersL':'Pickers',
+  'card.fewer':'Fewer pickers', 'card.more':'More pickers', 'card.max':'Max',
   'card.traitFruit':'Fruit ×{x}', 'card.traitDrain':'Drains ×{x}', 'card.traitQ':'Oil quality ×{x}', 'card.traitLate':'Ripens a month late', 'card.traitSlots':'{n} slots',
   'card.trees':'{mature} mature, {young} young, {free} free',
   'card.band':'{band:band.*} · {pct:pct}',
@@ -149,8 +151,7 @@ export default {
   'card.ripeGrowing':'Growing at ×{x} for this soil moisture. Harvest opens in {month}.',
   'card.ripeRest':'Resting. Fruit grows from May, fastest on lush soil.',
   'card.crewNote':'{wage:eur} a month each, {rate} kg a month. Or click the trees.',
-  'card.water':'💧 Water · {cost:eur}', 'card.drip':'Install drip · {cost:eur}', 'card.dripDone':'✅ Drip lines',
-  'card.plant':'🌱 Plant {n} · {cost:eur}', 'card.fill':'Fill {n} free slots · {cost:eur}',
+
   'card.why':'{label} ({why})', // a disabled button says why
   'why.cash':'not enough cash', 'why.noTrees':'no trees', 'why.wet':'soil is wet', 'why.installed':'installed', 'why.noSlots':'no free slots', 'why.full':'full', 'why.noMature':'no mature trees', 'why.season':'February to April only', 'why.pruned':'pruned this year',
   'card.standsTrees':'{n} mature trees at {health:pct} health', 'card.standsBare':'Bare land',
