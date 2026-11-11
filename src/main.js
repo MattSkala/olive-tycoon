@@ -1,0 +1,59 @@
+// Start-up and the frame loop. The other modules:
+//   config.js  numbers and tables to tune        rules.js    the game itself (no DOM, tested by test/rules.test.js)
+//   state.js   shared state, save and load       i18n.js     translation; the strings are in lang/*.js
+//   world.js   the 3D scene                      hud.js      the HTML over it
+//   actions.js buttons, keys and map clicks      audio.js    sounds
+import { app, load, save } from './state.js';
+import { sfx } from './audio.js';
+import { world, renderer, scene, camera, controls, fit } from './world.js';
+import { t, setLang, detectLang } from './i18n.js';
+import { $, toast, initHud, refresh, viewOf, openPanel, showEnd } from './hud.js';
+import { bindInput } from './actions.js';
+import { listen, stepDay } from './rules.js';
+
+const DAY_SEC = .35; // real seconds per game day at 1x
+
+setLang(detectLang());
+load();
+initHud();
+bindInput();
+
+// news from the rules becomes a toast; bad news slows the clock (lastSpeed is kept, so Space twice or a speed key restores it)
+listen((key, params, kind) => {
+  toast(t(key, params), kind);
+  if (kind === 'good') sfx.fanfare();
+  if (kind === 'warn') { sfx.warn(); if (app.speed > 1) app.speed = 1; }
+});
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  controls.maxDistance = 420 * fit();
+}
+addEventListener('resize', resize); resize();
+camera.position.sub(controls.target).multiplyScalar(fit()).add(controls.target); // the opening view, pulled back on an upright phone
+
+let acc = 0, last = performance.now(), lastMonth = app.s.month, feats = app.s.medals + app.s.green;
+function frame(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now;
+  const s = app.s;
+  if (!s.over && !s.event) { acc += dt * app.speed / DAY_SEC; while (acc >= 1) { acc--; stepDay(s); } }
+  if (s.month !== lastMonth) { lastMonth = s.month; save(); }
+  if (s.medals + s.green > feats) world.fx.fireworks(); // a medal or a Green Thumb
+  feats = s.medals + s.green;
+
+  // panels the game itself opens: the end, a decision, a new season report, the win
+  if (s.over) { if (app.end !== 'bankrupt') { save(); showEnd('bankrupt'); } }
+  else if (s.event) { if (app.panel !== 'event') openPanel('event'); }
+  else if (s.report && !s.report.seen) { if (app.panel !== 'report') { app.speed = 0; openPanel('report'); } }
+  else if (s.won && !s.wonSeen) { s.wonSeen = true; save(); sfx.fanfare(); world.fx.fireworks(); showEnd('won'); }
+
+  const frac = s.over || s.event ? 0 : acc; // how far into the current day, for smooth bars
+  world.update(viewOf(frac), now / 1000, dt); refresh(frac);
+  controls.update(); renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+$('loading').remove(); $('hud').hidden = false;
+if (app.fresh) { app.speed = 0; openPanel('help'); }
+requestAnimationFrame(frame);

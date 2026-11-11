@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mirsini · Olive Tycoon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<!--
+  Markup only. Every text here is filled in by src/i18n.js from the string key in a data-i18n attribute
+  (data-i18n = text, data-i18n-html = markup, data-i18n-title = tooltip, data-i18n-aria = aria-label).
+  Buttons act through data-a (an action in src/actions.js) and data-n (its argument).
+-->
+<div id="loading">Driving up to Mirsini… (needs an internet connection for three.js)</div>
+<script>
+  // Browsers do not load JavaScript modules from file://, so say how to start the game instead of showing a blank page.
+  if (location.protocol === 'file:') document.getElementById('loading').innerHTML =
+    '<p style="max-width:34em;padding:16px">This game needs a local web server. In this folder run <b>npm start</b> (or <b>python3 -m http.server 8000</b>) and open <b>http://localhost:8000</b>.<br><br>' +
+    'Hra potřebuje místní webový server. V této složce spusť <b>npm start</b> (nebo <b>python3 -m http.server 8000</b>) a otevři <b>http://localhost:8000</b>.</p>';
+</script>
+<canvas id="c"></canvas>
+
+<div id="hud" hidden>
+  <div id="top">
+    <div class="card" id="estate" data-i18n-title="top.worthTip">
+      <div class="badge"><small data-i18n="top.rank"></small><b id="rankN"></b></div>
+      <div class="grow"><b id="rankT"></b><div class="bar"><i id="goalBar"></i></div><small id="worthL"></small></div>
+    </div>
+    <div id="res">
+      <div class="res"><i class="ic gold">€</i><div><b id="cashV"></b><small data-i18n="top.cash"></small></div></div>
+      <div class="res"><i class="ic green">🫒</i><div><b id="fruitV"></b><small id="crewNote"></small></div></div>
+      <div class="res"><i class="ic yellow">💧</i><div><b id="oilV"></b><small id="oilG"></small></div></div>
+      <div class="res" data-i18n-title="top.repTip"><i class="ic teal">★</i><div><b id="repV"></b><small data-i18n="top.rep"></small></div></div>
+    </div>
+    <div id="tools">
+      <button class="tool" id="thirst" data-a="thirst">🚰<em class="dot" id="thirstN"></em></button>
+      <button class="tool" id="ovBtn" data-a="overlay" data-i18n-title="speed.water">💧</button>
+      <button class="tool" id="mute" data-a="mute" data-i18n-title="speed.sound">🔊</button>
+      <button class="tool" data-a="open" data-n="help" data-i18n-title="speed.help">?</button>
+    </div>
+  </div>
+  <div id="mid">
+    <div id="left">
+      <div class="card" id="goal">
+        <h3 data-i18n="goal.head"></h3>
+        <div class="task"><span id="goalT"></span><span class="chip2" id="goalR"></span></div>
+        <div class="bar"><i id="goalP"></i></div>
+        <button id="adv" data-a="advise" data-i18n-title="top.advTip"><span id="advT"></span></button>
+      </div>
+      <div class="card" id="list"></div>
+    </div>
+    <div id="toasts" aria-live="polite"></div>
+    <div class="card" id="card">
+      <header>
+        <button class="x" data-a="desel" data-i18n-aria="card.close">✕</button>
+        <button class="x" id="cMore" data-a="more" data-i18n="card.details" data-i18n-aria="card.detailsTip"></button>
+        <b id="cName"></b><small id="cBlurb" class="xtra"></small>
+        <div id="cTraits" class="xtra"></div>
+      </header>
+      <div id="cOwn">
+        <div class="kv xtra"><span data-i18n="card.treesL"></span><span id="cTrees"></span></div>
+        <div class="kv soil"><span data-i18n="card.soilL"></span><b id="cBand"></b></div>
+        <div class="bar soil"><i id="cMoist"></i></div><small id="cWaterNote" class="soil"></small>
+        <div class="kv xtra"><span data-i18n="card.healthL"></span><b id="cHealthV"></b></div>
+        <div class="bar xtra"><i id="cHealth"></i></div>
+        <div class="kv xtra"><span data-i18n="card.fruitL"></span><b id="cFruit"></b></div><small id="cRipe" class="xtra"></small>
+        <div class="kv" id="cCrewRow"><span data-i18n="card.pickersL"></span><span>
+          <button class="round" id="crewMinus" data-a="crew" data-n="-1" data-i18n-aria="card.fewer">−</button>
+          <span id="cCrew">0</span>
+          <button class="round" id="crewPlus" data-a="crew" data-n="1" data-i18n-aria="card.more">+</button>
+          <button id="crewMax" data-a="crew" data-n="99" data-i18n="card.max"></button>
+        </span></div><small id="cCrewNote" class="xtra"></small>
+        <div class="grid2">
+          <button class="blue" id="cWater" data-a="water" data-i18n-title="card.keyW"></button><button class="blue" id="cDrip" data-a="drip"></button>
+          <button id="cPlant" data-a="plant" data-n="10" data-i18n-title="card.keyP"></button><button id="cFill" data-a="plant" data-n="999"></button>
+        </div>
+      </div>
+      <div id="cSale">
+        <p id="cStands"></p>
+        <button class="gold" id="cBuy" data-a="buy"></button>
+      </div>
+    </div>
+  </div>
+  <div id="bottom">
+    <div class="card" id="season">
+      <div><b id="date"></b><div class="bar"><i id="dayBar"></i></div></div>
+      <div class="seg" id="speed">
+        <button data-a="speed" data-n="0" data-i18n-title="speed.pause">⏸</button><button data-a="speed" data-n="1" data-i18n-title="speed.1">1×</button><button data-a="speed" data-n="3" data-i18n-title="speed.2">3×</button><button data-a="speed" data-n="10" data-i18n-title="speed.3">10×</button>
+      </div>
+    </div>
+    <div id="dock">
+      <button id="harvestBtn" data-a="harvest" data-i18n-title="bar.harvestTip"><span>🧺</span><b data-i18n="bar.harvest"></b><small id="harvestN"></small></button>
+      <button class="tile" data-a="open" data-n="orders"><i>📜</i><span data-i18n="bar.contracts"></span><em class="dot" id="ordersN"></em></button>
+      <button class="tile" data-a="open" data-n="invest"><i>🏗</i><span data-i18n="bar.invest"></span></button>
+      <button class="tile" data-a="open" data-n="report" id="repBtn" data-i18n-title="bar.reportTip"><i>📒</i><span data-i18n="bar.report"></span></button>
+      <button class="tile" data-a="open" data-n="sell" id="sellTile"><i>🛒</i><span data-i18n="market.tile"></span></button>
+    </div>
+    <div class="card" id="market">
+      <div class="top"><b data-i18n="market.head"></b><span class="chip2" id="priceD" data-i18n-title="market.change"></span></div>
+      <div><b id="priceV"></b> <small data-i18n="market.perLitre"></small></div>
+      <div id="bars"></div>
+      <button id="sellBtn" data-a="open" data-n="sell"></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal" hidden>
+  <section data-p="help">
+    <h2 data-i18n="help.title"></h2>
+    <p><label><span data-i18n="help.lang"></span>: <select id="lang"></select></label></p>
+    <p data-i18n-html="help.introHtml"></p>
+    <p data-i18n-html="help.farmsHtml"></p>
+    <p data-i18n-html="help.waterHtml"></p>
+    <p data-i18n-html="help.harvestHtml"></p>
+    <p data-i18n-html="help.sellHtml"></p>
+    <p class="muted touchonly" data-i18n-html="help.touchHtml"></p>
+    <p class="muted keysonly" data-i18n-html="help.keysHtml"></p>
+    <div class="row"><button class="big" data-a="close" data-i18n="help.play"></button><button data-a="new" data-i18n="help.restart"></button></div>
+  </section>
+  <section data-p="sell">
+    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
+    <h2 data-i18n="sell.title"></h2>
+    <p id="sellInfo"></p>
+    <svg viewBox="0 0 180 40" preserveAspectRatio="none" role="img" data-i18n-aria="sell.chart"><polyline id="spark" fill="none" stroke="#b5562b" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>
+    <p class="muted" data-i18n="sell.note"></p>
+    <div class="row"><button id="sell25" data-a="sell" data-n=".25"></button><button id="sell50" data-a="sell" data-n=".5"></button><button class="big" id="sell100" data-a="sell" data-n="1"></button></div>
+  </section>
+  <section data-p="orders">
+    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
+    <h2 data-i18n="orders.title"></h2>
+    <p class="muted" data-i18n="orders.note"></p>
+    <p id="cellarInfo"></p>
+    <h3 data-i18n="orders.yours"></h3><div id="orderList"></div>
+    <h3 data-i18n="orders.offers"></h3><div id="offerList"></div>
+  </section>
+  <section data-p="invest">
+    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
+    <h2 data-i18n="invest.title"></h2>
+    <p id="investInfo"></p>
+    <div id="upgs"></div>
+  </section>
+  <section data-p="event">
+    <h2 id="evT"></h2>
+    <p id="evX"></p>
+    <div class="row"><button class="big" id="ev0" data-a="decide" data-n="0"></button><button id="ev1" data-a="decide" data-n="1"></button></div>
+  </section>
+  <section data-p="report">
+    <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
+    <div id="repBody"></div>
+    <div class="row"><button class="big" data-a="close" data-i18n="rep.continue"></button></div>
+  </section>
+  <section data-p="end">
+    <h2 id="endTitle"></h2>
+    <p id="endText"></p>
+    <div class="row"><button class="big" id="endGo" data-a="close" data-i18n="end.keep"></button><button data-a="new" data-i18n="end.new"></button></div>
+  </section>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
