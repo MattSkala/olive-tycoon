@@ -17,6 +17,17 @@
 -->
 <div id="loading">Driving up to Mirsini… (needs an internet connection for three.js)</div>
 <script>
+  // After a new version is published, a browser can run this fresh page with script files it cached from the old version (they are cached
+  // for ten minutes), and the mix breaks. So on the first error, re-download every file of the game past the cache and reload, once.
+  function heal() {
+    if (Date.now() - (+sessionStorage.healed || 0) < 600000) return; // at most once in ten minutes, so a real bug cannot loop
+    sessionStorage.healed = Date.now();
+    var urls = performance.getEntriesByType('resource').map(function (r) { return r.name; }).filter(function (u) { return u.indexOf(location.origin) === 0; }).concat(location.href);
+    Promise.all(urls.map(function (u) { return fetch(u, { cache:'reload' }).catch(function () {}); })).then(function () { location.reload(); });
+  }
+  addEventListener('error', heal); addEventListener('unhandledrejection', heal);
+</script>
+<script>
   // Browsers do not load JavaScript modules from file://, so say how to start the game instead of showing a blank page.
   if (location.protocol === 'file:') document.getElementById('loading').innerHTML =
     '<p style="max-width:34em;padding:16px">This game needs a local web server. In this folder run <b>npm start</b> (or <b>python3 -m http.server 8000</b>) and open <b>http://localhost:8000</b>.<br><br>' +
