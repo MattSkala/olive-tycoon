@@ -154,7 +154,7 @@ export default {
 
   // ---- spodní lišta
   'top.rank':'ÚR.', 'top.worthOf':'{w:eur} z {goal:eur}', 'top.onTrees':'na stromech', 'top.inCellar':'ve sklepě', 'goal.head':'Úkol',
-  'bar.harvest':'Sklizeň', 'bar.harvestReady':'lze sklízet', 'bar.harvestTip':'Poslat plnou partu na každou farmu, kde lze sklízet. Dalším kliknutím je pošleš domů.',
+  'bar.harvest':'Sklizeň', 'bar.harvestStop':'Stop', 'bar.harvestReady':'lze sklízet', 'bar.harvestNone':'nic nezraje', 'bar.harvestTip':'Poslat plnou partu na každou farmu, kde lze sklízet. Dokud sklízejí, tlačítko je zelené a je na něm Stop: kliknutím je pošleš domů.',
   'bar.contracts':'Zakázky', 'bar.invest':'Vybavení', 'bar.report':'Výkaz',
   'market.head':'Trh s olejem', 'market.perLitre':'za litr', 'market.sell':'Prodat olej · {l:num} l', 'market.tile':'Trh', 'market.change':'Změna tržní ceny za poslední měsíc',
   'bar.reportTip':'Výkaz za minulou sezónu (R)',
@@ -187,7 +187,6 @@ export default {
   'help.touchHtml':'Dotyk: tažením se pohybuješ, dvěma prsty přibližuješ a otáčíš. Klepnutím na pozemek ho vybereš, klepáním na zralé stromy sklízíš, klepnutím na prázdnou zem zavřeš kartu farmy.',
   'help.keysHtml':'Tažením otáčíš, kolečkem přibližuješ, šipkami posouváš. Klávesy: <kbd>mezerník</kbd> pauza, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> rychlost, <kbd>Tab</kbd> další farma, <kbd>W</kbd> zalít, <kbd>P</kbd> zasadit 10, <kbd>+</kbd> <kbd>−</kbd> česáči, <kbd>V</kbd> mapa vláhy, <kbd>S</kbd> prodej, <kbd>C</kbd> zakázky, <kbd>I</kbd> investice, <kbd>R</kbd> výkaz, <kbd>M</kbd> zvuk, <kbd>Esc</kbd> zavřít, zrušit výběr, pak oddálit.',
   'sound.title':'🔊 Zvuk', 'sound.music':'Hudba', 'sound.musicNote':'Hudba na pozadí v krétském stylu', 'sound.sfx':'Zvukové efekty', 'sound.sfxNote':'Kliknutí, mince, voda, nůžky a kozy',
-  'sound.on':'Zap.', 'sound.off':'Vyp.',
   'confirm.new':'Opustit tenhle statek a začít znovu?',
 
   'sell.title':'🛒 Trh', 'sell.chart':'Tržní cena za posledních šest měsíců',

@@ -37,9 +37,9 @@ const ACTIONS = {
   plant: n => { const k = app.sel >= 0 && plant(app.s, app.sel, +n); if (k) { floatAt(app.sel, `🌱 +${k}`); sfx.plant(); return true; } },
   prune: () => {
     const i = app.sel, cost = i >= 0 && pruneCost(app.s, i);
-    if (i >= 0 && prune(app.s, i)) { floatAt(i, `✂️ −${fmt.eur(cost)}`); sfx.snip(); return true; }
+    if (i >= 0 && prune(app.s, i)) { world.fx.prune(i); floatAt(i, `✂️ −${fmt.eur(cost)}`); sfx.snip(); return true; }
   },
-  drip: () => { if (app.sel >= 0 && buyDrip(app.s, app.sel)) floatAt(app.sel, `−${fmt.eur(dripCost(app.sel))}`); },
+  drip: () => { if (app.sel >= 0 && buyDrip(app.s, app.sel)) { world.fx.drip(app.sel); floatAt(app.sel, `−${fmt.eur(dripCost(app.sel))}`); } },
   buy: () => { if (app.sel >= 0 && buyFarm(app.s, app.sel)) { world.fx.buy(app.sel); floatAt(app.sel, `−${fmt.eur(FARMS[app.sel].price)}`); } },
   crew: (n, i = app.sel >= 0 ? app.sel : ripest(app.s)) => { if (i >= 0) setCrew(app.s, i, app.s.farms[i].crew + +n); },
   harvest: () => setCrewAll(app.s, crewTotal(app.s) ? 0 : CREW_MAX), // the big button: every crew out, or all of them home
@@ -47,7 +47,7 @@ const ACTIONS = {
   accept: n => accept(app.s, +n),
   deliver: n => { if (deliver(app.s, +n)) world.fx.van(); },
   decide: n => { const s = app.s, i = s.evFarm, fire = s.event === 'fire'; decide(s, +n); if (fire) world.fx.fire(i); closePanel(); }, // decide forgets the farm
-  up: n => upgrade(app.s, n),
+  up: n => { if (upgrade(app.s, n)) { closePanel(); world.flyTo(n); world.fx.built(n); } }, // the panel closes so you watch it being built
   new: () => { if (app.s.over || confirm(t('confirm.new'))) { restart(); closePanel(); } },
 };
 

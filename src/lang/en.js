@@ -159,7 +159,7 @@ export default {
 
   // ---- bottom bar
   'top.rank':'RANK', 'top.worthOf':'{w:eur} of {goal:eur}', 'top.onTrees':'on the trees', 'top.inCellar':'in the cellar', 'goal.head':'Objective',
-  'bar.harvest':'Harvest', 'bar.harvestReady':'ready to pick', 'bar.harvestTip':'Send a full crew to every farm that can be picked. Click again to send them home.',
+  'bar.harvest':'Harvest', 'bar.harvestStop':'Stop', 'bar.harvestReady':'ready to pick', 'bar.harvestNone':'nothing ripe', 'bar.harvestTip':'Send a full crew to every farm that can be picked. While they pick, the button is green and says Stop: click it to send them home.',
   'bar.contracts':'Contracts', 'bar.invest':'Equipment', 'bar.report':'Report',
   'market.head':'Oil market', 'market.perLitre':'per litre', 'market.sell':'Sell oil · {l:num} L', 'market.tile':'Market', 'market.change':'Change of the market price over the last month',
   'bar.reportTip':'Last season\'s report (R)',
@@ -192,7 +192,6 @@ export default {
   'help.touchHtml':'Touch: drag to move around, pinch to zoom, twist two fingers to rotate. Tap a plot to select it, tap ripe trees to pick them, tap empty ground to close the farm card.',
   'help.keysHtml':'Drag to rotate, scroll to zoom, arrow keys to pan. Keys: <kbd>Space</kbd> pause, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> speed, <kbd>Tab</kbd> next farm, <kbd>W</kbd> water, <kbd>P</kbd> plant 10, <kbd>+</kbd> <kbd>−</kbd> pickers, <kbd>V</kbd> water view, <kbd>S</kbd> sell, <kbd>C</kbd> contracts, <kbd>I</kbd> invest, <kbd>R</kbd> report, <kbd>M</kbd> sound, <kbd>Esc</kbd> close, deselect, then zoom out.',
   'sound.title':'🔊 Sound', 'sound.music':'Music', 'sound.musicNote':'Cretan-style background music', 'sound.sfx':'Sound effects', 'sound.sfxNote':'Clicks, coins, water, shears and the goats',
-  'sound.on':'On', 'sound.off':'Off',
   'confirm.new':'Abandon this estate and start over?',
 
   'sell.title':'🛒 Market', 'sell.chart':'Market price, last six months',

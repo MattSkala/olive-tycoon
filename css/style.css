@@ -1,5 +1,7 @@
 /* The HUD's look: cream cards with a dark olive outline and a hard shadow, like stickers on the map.
    Layout: #hud is a column: #top (estate, resources, tools), #mid (objective and farm list, toasts, farm card), #bottom (season, dock, market). */
+/* The font is served from here, complete: the files Google Fonts hands to browsers lack most Czech letters (č ě ř ů ň ť ď). */
+@font-face { font-family:Fredoka; src:url(../fonts/Fredoka.ttf) format('truetype'); font-weight:300 700; font-display:swap; }
 :root {
   --cream:#fbf5e3; --well:#efe6c9; /* card, and the recessed areas inside one */
   --ink:#2f3a1a; --muted:#737a5c; /* outlines and text */
@@ -115,7 +117,12 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 #harvestBtn { width:108px; height:108px; padding:0; border-radius:50%; border:3px solid var(--ink); background:var(--orange); box-shadow:0 5px 0 var(--orange-d), 0 10px 18px rgba(0,0,0,.2);
   display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; }
 #harvestBtn span { font-size:26px; } #harvestBtn b { text-transform:uppercase; letter-spacing:.6px; font-size:14px; } #harvestBtn small { color:#ffe3c9; font-size:11px; min-height:1.1em; }
+/* while crews are out the button is green, says Stop and sends out rings, so it reads as running */
 #harvestBtn.on { background:var(--olive); box-shadow:0 5px 0 var(--olive-d), 0 10px 18px rgba(0,0,0,.2); }
+#harvestBtn.on::before { content:''; position:absolute; inset:-3px; border-radius:50%; border:3px solid #b6d65a; animation:ring 1.4s ease-out infinite; pointer-events:none; }
+#harvestBtn.on small { color:#e3efb8; }
+@keyframes ring { from { transform:scale(1); opacity:.9; } to { transform:scale(1.35); opacity:0; } }
+@media (prefers-reduced-motion:reduce) { #harvestBtn.on::before { animation:none; inset:-8px; opacity:.9; } }
 #harvestBtn:disabled { background:#c9c4ab; box-shadow:0 5px 0 #9c987f; } #harvestBtn:disabled small { color:#77745f; }
 .tile { width:86px; height:88px; padding:6px 4px; background:var(--cream); color:var(--ink); border:var(--line); border-radius:17px; box-shadow:var(--lift);
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; font-size:12.5px; }
@@ -161,7 +168,10 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 #modal .row:last-child { position:sticky; bottom:-20px; margin:0; padding:8px 0 5px; background:var(--cream); } /* Play and Continue stay in reach when a panel is taller than the window */
 .upg { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:8px 0; border-top:1.5px solid #e3d9b9; }
 .upg button { white-space:nowrap; }
-.switch { min-width:74px; background:#c9c4ab; color:#5f5c4a; box-shadow:0 3px 0 #a9a58d; } .switch.on { background:var(--olive); color:var(--cream); box-shadow:0 3px 0 var(--olive-d); }
+.switch { flex:none; width:58px; height:32px; padding:0; border-radius:16px; background:#c9c4ab; box-shadow:none; transition:background .15s; } /* a sliding toggle */
+.switch::after { content:''; position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:var(--cream); border:2px solid var(--ink); box-sizing:border-box; transition:transform .15s; }
+.switch.on { background:var(--olive); } .switch.on::after { transform:translateX(26px); }
+.switch:active { transform:none; box-shadow:none; }
 svg { width:100%; height:60px; background:var(--well); border-radius:10px; }
 kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; font-size:13px; }
 
@@ -206,6 +216,7 @@ kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; 
 }
 @media (pointer:coarse) { /* fingers need bigger targets than a mouse pointer */
   button { min-height:44px; } button.round { width:40px; height:40px; min-height:40px; }
+  .switch { width:66px; height:36px; min-height:36px; border-radius:18px; } .switch::after { width:28px; height:28px; } .switch.on::after { transform:translateX(30px); }
   .seg button { min-height:36px; min-width:38px; } .chip { min-height:38px; } .chip button { min-height:32px; padding:3px 11px; font-size:13px; }
   .frow { padding:9px 8px; } #modal .x { min-width:44px; }
   .touchonly { display:block; } .keysonly { display:none; }

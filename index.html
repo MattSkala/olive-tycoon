@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Mirsini · Olive Tycoon</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
@@ -110,7 +108,7 @@
       </div>
     </div>
     <div id="dock">
-      <button id="harvestBtn" data-a="harvest" data-i18n-title="bar.harvestTip"><span>🧺</span><b data-i18n="bar.harvest"></b><small id="harvestN"></small></button>
+      <button id="harvestBtn" data-a="harvest" data-i18n-title="bar.harvestTip"><span id="harvestI"></span><b id="harvestL"></b><small id="harvestN"></small></button>
       <button class="tile" data-a="open" data-n="orders"><i>📜</i><span data-i18n="bar.contracts"></span><em class="dot" id="ordersN"></em></button>
       <button class="tile" data-a="open" data-n="invest"><i>🏗</i><span data-i18n="bar.invest"></span></button>
       <button class="tile" data-a="open" data-n="report" id="repBtn" data-i18n-title="bar.reportTip"><i>📒</i><span data-i18n="bar.report"></span></button>
@@ -164,8 +162,8 @@
   <section data-p="sound">
     <button class="x" data-a="close" data-i18n-aria="card.close">✕</button>
     <h2 data-i18n="sound.title"></h2>
-    <div class="upg"><div><b data-i18n="sound.music"></b><div class="muted" data-i18n="sound.musicNote"></div></div><button class="switch" id="sw-music" data-a="audio" data-n="music"></button></div>
-    <div class="upg"><div><b data-i18n="sound.sfx"></b><div class="muted" data-i18n="sound.sfxNote"></div></div><button class="switch" id="sw-sfx" data-a="audio" data-n="sfx"></button></div>
+    <div class="upg"><div><b data-i18n="sound.music"></b><div class="muted" data-i18n="sound.musicNote"></div></div><button class="switch" id="sw-music" role="switch" data-a="audio" data-n="music" data-i18n-aria="sound.music"></button></div>
+    <div class="upg"><div><b data-i18n="sound.sfx"></b><div class="muted" data-i18n="sound.sfxNote"></div></div><button class="switch" id="sw-sfx" role="switch" data-a="audio" data-n="sfx" data-i18n-aria="sound.sfx"></button></div>
   </section>
   <section data-p="event">
     <h2 id="evT"></h2>

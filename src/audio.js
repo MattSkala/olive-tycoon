@@ -14,15 +14,17 @@ export function setAudio(part, on) {
 }
 
 // ---------- start-up: browsers only allow sound after a user gesture ----------
+// iOS does not count pointerdown as one, so a start made there was refused and the music stayed silent until a switch was clicked.
+// So: listen for the gestures every browser accepts, on every one of them, until the music really runs.
 let ctx, out, started = false;
-function start() {
-  if (started) return;
+function start(e) {
+  if (!e.isTrusted) return; // a scripted click is not a gesture
   started = true;
-  try { ctx = new AudioContext(); out = ctx.createGain(); out.gain.value = SFX_VOLUME; out.connect(ctx.destination); } catch {}
+  if (!ctx) try { ctx = new AudioContext(); out = ctx.createGain(); out.gain.value = SFX_VOLUME; out.connect(ctx.destination); } catch {}
+  if (ctx?.state === 'suspended') ctx.resume();
   syncMusic();
 }
-addEventListener('pointerdown', start, { once:true });
-addEventListener('keydown', start, { once:true });
+for (const e of ['pointerup', 'touchend', 'click', 'keydown']) addEventListener(e, start, true);
 
 // ---------- music: the tracks in turn, for as long as the switch is on and the page is visible ----------
 let player, track = 0, misses = 0;

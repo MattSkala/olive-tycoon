@@ -206,8 +206,10 @@ function refreshBottom(s, frac) {
   $('dayBar').style.width = (s.day + frac) / DAYS * 100 + '%';
   for (const b of $('speed').children) prop(b, 'className', +b.dataset.n === app.speed ? 'on' : '');
   // dock: the Harvest button sends every crew out, or home again
+  // it names what a click does (Harvest, or Stop while crews are out) and, under that, what is going on now
   $('harvestBtn').disabled = !ripe && !crew; prop($('harvestBtn'), 'className', crew ? 'on' : '');
-  T('harvestN', crew ? t('list.pickers', { n:crew }) : ripe ? t('bar.harvestReady') : '');
+  T('harvestI', crew ? '⏹' : '🧺'); T('harvestL', t(crew ? 'bar.harvestStop' : 'bar.harvest'));
+  T('harvestN', crew ? t('list.pickers', { n:crew }) : t(ripe ? 'bar.harvestReady' : 'bar.harvestNone'));
   hide($('ordersN'), !contracts); T('ordersN', String(contracts));
   $('repBtn').disabled = !s.report;
   // oil market: your price, the market's change over a month, and ten bars of the last six months
@@ -240,7 +242,7 @@ function refreshPanels(s) {
   T('investInfo', t('invest.info', { upkeep:upkeep(s), tree:UPKEEP_TREE, sapling:UPKEEP_SAPLING }) + (s.cash < 0 ? t('invest.overdraft', { pct:OVERDRAFT_INTEREST, limit:-OVERDRAFT }) : ''));
   for (const [k, u] of Object.entries(UPGRADES)) { T('up-' + k, s.up[k] ? t('invest.owned') : fmt.eur(u.cost)); $('up-' + k).disabled = !!s.up[k] || !canPay(s, u.cost, 'invest'); }
   // sound switches
-  for (const part of ['music', 'sfx']) { const b = $('sw-' + part); T('sw-' + part, t(audio[part] ? 'sound.on' : 'sound.off')); prop(b, 'className', 'switch' + (audio[part] ? ' on' : '')); b.setAttribute('aria-pressed', audio[part]); }
+  for (const part of ['music', 'sfx']) { const b = $('sw-' + part); prop(b, 'className', 'switch' + (audio[part] ? ' on' : '')); b.setAttribute('aria-checked', audio[part]); }
   // a pending decision
   const ev = eventView(s);
   if (ev) {
