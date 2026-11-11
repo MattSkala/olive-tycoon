@@ -10,7 +10,7 @@
 * { box-sizing:border-box; }
 [hidden] { display:none !important; }
 html, body { margin:0; height:100%; overflow:hidden; background:#e9d6b8; color:var(--ink); font:500 15px/1.35 Fredoka, ui-rounded, "Avenir Next", system-ui, sans-serif; user-select:none; -webkit-user-select:none;
-  overscroll-behavior:none; touch-action:manipulation; -webkit-tap-highlight-color:transparent; } /* no pull-to-refresh, double-tap zoom or tap flash over the game */
+  overscroll-behavior:none; touch-action:pan-x pan-y; -webkit-tap-highlight-color:transparent; } /* no pull-to-refresh, no pinch or double-tap zoom of the page (panels still scroll), no tap flash */
 canvas { position:fixed; inset:0; width:100%; height:100%; display:block; }
 #loading { position:fixed; inset:0; display:grid; place-items:center; color:var(--olive-d); font-size:18px; }
 small { display:block; font-size:12px; font-weight:400; color:var(--muted); }
@@ -87,7 +87,7 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 #cCrew { display:inline-block; min-width:22px; text-align:center; font-size:18px; font-weight:700; }
 #crewMax { padding:5px 9px; }
 .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:12px; }
-.grid2 button { font-size:13px; padding:7px 6px; min-height:50px; } #cWaterNote, #cRipe { min-height:2.8em; } /* room for two lines, so a wrapping note or label never moves a button under the cursor */
+.grid2 button { font-size:13px; padding:7px 6px; min-height:50px; } .grid2 .wide { grid-column:1 / -1; min-height:0; } #cWaterNote, #cRipe { min-height:2.8em; } /* room for two lines, so a wrapping note or label never moves a button under the cursor */
 #cBuy { width:100%; margin-top:10px; font-size:15px; }
 
 /* ---- bottom: season and speed, the action dock, the oil market */
@@ -155,7 +155,7 @@ kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; 
   #list, #goal h3 { display:none; }
   .card { border-radius:14px; }
   #card header { padding:0 12px 4px; } #cName { display:block; line-height:40px; } #card .x { height:40px; min-height:0; top:0; } #card #cMore { display:block; right:44px; font-size:13px; text-decoration:underline; }
-  #card:not(.more) .xtra, #card:not(.more):not(.pick) #cCrewRow { display:none; }
+  #card:not(.more) .xtra, #card:not(.more):not(.pick) #cCrewRow, #card:not(.more):not(.season) #cPrune { display:none; } /* crew and pruning show in their seasons */
   #cOwn { display:flex; flex-direction:column; } .soil { order:-3; } #cCrewRow, #cCrewNote { order:-2; } #cOwn .grid2 { order:-1; }
   #cWaterNote, #cRipe { min-height:0; } .kv { margin-top:5px; } .grid2 { margin-top:8px; }
 }

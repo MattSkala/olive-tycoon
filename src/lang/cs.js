@@ -32,6 +32,7 @@ export default {
   // ---- zprávy
   'say.farmBought':'Farma {farm} je tvoje.',
   'say.planted':{ one:'Farma {farm}: zasazena {n} sazenice.', few:'Farma {farm}: zasazeny {n} sazenice.', other:'Farma {farm}: zasazeno {n} sazenic.' },
+  'say.pruned':'Farma {farm} je ořezaná: dvě sezóny víc plodů a rychlejší sklizeň.',
   'say.drip':'Farma {farm} má kapkovou závlahu.',
   'say.sold':'Prodáno {l:num} l za {got:eur}.',
   'say.upgrade':'Koupeno: {up:up.*.name}.',
@@ -99,6 +100,7 @@ export default {
   'adv.dryIn':{ one:'Farma {farm} vyschne za {n} den. Pošli cisternu hned, ať nepřijdeš o Zelený palec.', few:'Farma {farm} vyschne za {n} dny. Pošli cisternu hned, ať nepřijdeš o Zelený palec.', other:'Farma {farm} vyschne za {n} dní. Pošli cisternu hned, ať nepřijdeš o Zelený palec.' },
   'adv.orderDue':'Tento měsíc končí zakázka pro odběratele „{buyer:buyer.*}“: {l} l, {grade:grade.*} nebo lepší.',
   'adv.pick':'Farma {farm} má {kg:num} kg oliv ({stage:stage.*}). Najmi česáče, nebo klikej na stromy.',
+  'adv.prune':'Je čas na řez: ořež farmu {farm} ({cost:eur}), bude víc plodů a rychlejší sklizeň.',
   'adv.plant':'Zasaď teď sazenice na farmě {farm}: zimní déšť je zalije zadarmo.',
   'adv.afford':'Můžeš si dovolit farmu {farm} ({price:eur}). Klikni na její pozemek.',
   'adv.drip':'Kapková závlaha na farmě {farm} ({cost:eur}) by ukončila jízdy cisteren.',
@@ -124,6 +126,10 @@ export default {
   'block.owned':'Už je tvoje', 'block.rep':'Chce pověst {rep}', 'block.cash':'Nemáš dost peněz',
 
   // ---- karta farmy
+  'canopy.tidy':'upravené', 'canopy.grown':'zarostlé', 'canopy.wild':'přerostlé',
+  'canopy.tidyNote':'o {fruit:pct} víc plodů, sklizeň o {pick:pct} rychlejší', 'canopy.grownNote':'je čas na řez', 'canopy.wildNote':'o {fruit:pct} méně plodů, sklizeň o {pick:pct} pomalejší',
+  'card.canopyL':'Koruny', 'card.prunedNow':'letos ořezáno', 'card.pruned':{ one:'ořezáno před {n} rokem', few:'ořezáno před {n} lety', other:'ořezáno před {n} lety' },
+  'card.prune':'✂️ Ořezat · {cost:eur}',
   'card.close':'Zavřít', 'card.details':'Detaily', 'card.detailsTip':'Zobrazit nebo skrýt podrobnosti farmy',
   'card.treesL':'Stromy', 'card.soilL':'Půda', 'card.healthL':'Zdraví stromů', 'card.fruitL':'Plody', 'card.pickersL':'Česáči',
   'card.fewer':'Méně česáčů', 'card.more':'Více česáčů', 'card.max':'Max', 'card.keyW':'Klávesa W', 'card.keyP':'Klávesa P',
@@ -141,7 +147,7 @@ export default {
   'card.crewNote':'Každý {wage:eur} měsíčně, sklidí {rate} kg za měsíc. Nebo klikej na stromy.',
   'card.water':'💧 Zalít · {cost:eur}', 'card.drip':'Kapková závlaha · {cost:eur}', 'card.dripDone':'✅ Kapková závlaha',
   'card.plant':'🌱 Zasadit {n} · {cost:eur}', 'card.fill':'Osázet {n} volných míst · {cost:eur}',
-  'why.cash':'nemáš dost peněz', 'why.noTrees':'žádné stromy', 'why.wet':'půda je mokrá', 'why.installed':'položena', 'why.noSlots':'žádné volné místo', 'why.full':'plno',
+  'why.cash':'nemáš dost peněz', 'why.noTrees':'žádné stromy', 'why.wet':'půda je mokrá', 'why.installed':'položena', 'why.noSlots':'žádné volné místo', 'why.full':'plno', 'why.noMature':'žádné dospělé stromy', 'why.season':'jen únor až duben', 'why.pruned':'letos už ořezáno',
   'card.standsTrees':'{n} dospělých stromů, zdraví {health:pct}', 'card.standsBare':'Holá půda',
   'card.stands':'{stands}, místo pro {slots} stromů. Kapková závlaha by tu stála {cost:eur}.',
   'card.buy':'Koupit farmu {farm} · {price:eur}',
@@ -158,6 +164,7 @@ export default {
   'help.introHtml':'Zdědil jsi Patriko, háj 60 olivovníků odrůdy Koroneiki nad zálivem Mirabello, a k tomu {start:eur}. Vybuduj statek v hodnotě <b>{goal:eur}</b>: počítá se hotovost, olej, půda, stromy i vybavení, takže investice tě nikdy nevrátí zpět. Nech si ale peníze na údržbu a mzdy: pod −{limit:eur} banka prodá tvůj sklep a pak statek zabaví.',
   'help.farmsHtml':'<b>Farmy.</b> Kliknutím na pozemek si ho prohlédneš. Kolem zálivu je na prodej pět dalších, každý s jinou půdou. Kup je, zasaď sazenice (plodí po dvou nových rocích) a na kartě každé farmy najmi česáče.',
   'help.waterHtml':'<b>Voda.</b> V létě půda vysychá. Suché stromy mají málo plodů, vyprahlé chřadnou a sazenice usychají. Pošli cisternu tlačítkem 💧 u farmy, nebo polož kapkovou závlahu a farma se zalévá sama. Zimní déšť je zadarmo.',
+  'help.pruneHtml':'<b>Řez.</b> Od února do dubna můžeš stromy na farmě ořezat. Upravené koruny dvě sezóny víc plodí a rychleji se sklízejí, takže stačí řezat každý druhý rok. Bez řezu stromy přerostou: méně plodů a pomalá sklizeň.',
   'help.harvestHtml':'<b>Sklizeň</b> (říjen až leden): klikáním na stromy sklízíš ručně, rychlé kliky dělají kombo, nebo najmi česáče. Rané olivy dají málo oleje nejvyšší třídy; pozdní dají víc oleje nižší třídy a plody mezitím opadávají.',
   'help.sellHtml':'<b>Prodávej</b> na trhu po částech, protože velká dávka srazí cenu, nebo ber <b>zakázky</b> z vesnice: platí mnohem víc, ale chtějí určitou třídu a mají termín. <b>Pověst</b> zvyšuje všechny tvoje ceny a odemyká lepší farmy.',
   'help.touchHtml':'Dotyk: tažením se pohybuješ, dvěma prsty přibližuješ a otáčíš. Klepnutím na pozemek ho vybereš, klepáním na zralé stromy sklízíš, klepnutím na prázdnou zem zavřeš kartu farmy.',

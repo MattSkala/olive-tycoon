@@ -7,7 +7,7 @@ import { t, fmt } from './i18n.js';
 import { $, float, floatAt, openPanel, closePanel, locked } from './hud.js';
 import { FARMS, CREW_MAX } from './config.js';
 import {
-  accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
+  accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, prune, pruneCost, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
 } from './rules.js';
 
 const select = i => { if (i >= 0) { app.sel = i; world.flyTo(i); } };
@@ -32,6 +32,10 @@ const ACTIONS = {
     if (i >= 0 && water(s, i)) { world.fx.truck(i); floatAt(i, `💧 −${fmt.eur(cost)}`); sfx.water(); return true; }
   },
   plant: n => { const k = app.sel >= 0 && plant(app.s, app.sel, +n); if (k) { floatAt(app.sel, `🌱 +${k}`); sfx.plant(); return true; } },
+  prune: () => {
+    const i = app.sel, cost = i >= 0 && pruneCost(app.s, i);
+    if (i >= 0 && prune(app.s, i)) { floatAt(i, `✂️ −${fmt.eur(cost)}`); sfx.snip(); return true; }
+  },
   drip: () => { if (app.sel >= 0 && buyDrip(app.s, app.sel)) floatAt(app.sel, `−${fmt.eur(dripCost(app.sel))}`); },
   buy: () => { if (app.sel >= 0 && buyFarm(app.s, app.sel)) { world.fx.buy(app.sel); floatAt(app.sel, `−${fmt.eur(FARMS[app.sel].price)}`); } },
   crew: (n, i = app.sel >= 0 ? app.sel : ripest(app.s)) => { if (i >= 0) setCrew(app.s, i, app.s.farms[i].crew + +n); },

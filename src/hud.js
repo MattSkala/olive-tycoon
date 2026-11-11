@@ -4,9 +4,9 @@ import { app, setSpeed } from './state.js';
 import { audio } from './audio.js';
 import { world } from './world.js';
 import { t, fmt, monthName, LANGS, getLang, setLang, translatePage } from './i18n.js';
-import { DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, CREW_MAX, UPGRADES, MAX_ORDERS, FARMS } from './config.js';
+import { DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, CREW_MAX, UPGRADES, MAX_ORDERS, FARMS, CANOPY, PRUNE_MONTHS } from './config.js';
 import {
-  OBJECTIVES, advice, buyBlock, canDeliver, canPay, canPick, crewTotal, dripCost, eventView, farmStatus, freeSlots, fruitAll, fruitFrac, gradeOf, growth,
+  OBJECTIVES, advice, buyBlock, canDeliver, canPay, canPick, canopyOf, crewTotal, pruneBlock, pruneCost, dripCost, eventView, farmStatus, freeSlots, fruitAll, fruitFrac, gradeOf, growth,
   matureAll, owned, pickQ, rankOf, rate, sellPrice, sellValue, slots, stageOf, thirsty, trees, upkeep, waterCost, worth, young,
 } from './rules.js';
 
@@ -66,7 +66,7 @@ export function viewOf(frac) {
   s.farms.forEach((f, i) => {
     const q = vw.farms[i];
     q.own = f.own; q.mature = f.mature; q.sap = f.sap; q.fruit = fruitFrac(s, i); q.stage = stageOf(s, i)?.name || null;
-    q.moist = f.moist; q.health = f.health; q.drip = f.drip; q.crew = f.crew; q.picking = f.crew > 0 && canPick(s, i);
+    q.moist = f.moist; q.health = f.health; q.canopy = canopyOf(f); q.drip = f.drip; q.crew = f.crew; q.picking = f.crew > 0 && canPick(s, i);
     vw.pressing ||= q.picking;
   });
   return vw;
@@ -161,7 +161,7 @@ function refreshCard(s) {
   setHTML('cTraits', `<span>${t('soil.' + F.soil)}</span>` + [['Fruit', F.fruit, 1], ['Drain', F.drain, -1], ['Q', F.q, 1]].map(([k, x, good]) =>
     `<span class="${x === 1 ? '' : (x - 1) * good > 0 ? 'pos' : 'neg'}">${t('card.trait' + k, { x })}</span>`).join('')
     + (F.late ? `<span>${t('card.traitLate')}</span>` : '') + `<span>${t('card.traitSlots', { n:slots(i) })}</span>`);
-  hide($('cOwn'), !f.own); hide($('cSale'), f.own); $('card').classList.toggle('pick', pk);
+  hide($('cOwn'), !f.own); hide($('cSale'), f.own); $('card').classList.toggle('pick', pk); $('card').classList.toggle('season', PRUNE_MONTHS.includes(s.month));
   if (!f.own) {
     const block = buyBlock(s, i);
     T('cStands', t('card.stands', { stands:F.old ? t('card.standsTrees', { n:F.old, health:F.oldHealth / 100 }) : t('card.standsBare'), slots:slots(i), cost:dripCost(i) }));
@@ -172,15 +172,19 @@ function refreshCard(s) {
   T('cBand', cap(t('card.band', { band:st.band, pct:f.moist / 100 }))); fill($('cMoist'), f.moist, st.band);
   T('cWaterNote', [dryIn(st), f.drip ? '' : st.since === null ? t('card.never') : t('card.since', { n:st.since }), f.dryDays ? t('card.dryDays', { n:f.dryDays }) : ''].filter(Boolean).join(' · '));
   T('cHealthV', fmt.pct(f.health / 100)); fill($('cHealth'), f.health);
+  const cn = canopyOf(f), C = CANOPY[cn]; // the note says what the canopy does to the crop and the picking, and when it was last pruned
+  T('cCanopy', cap(t('canopy.' + cn)));
+  T('cCanopyNote', [t('canopy.' + cn + 'Note', { fruit:Math.abs(C.fruit - 1), pick:Math.abs(C.pick - 1) }), f.pruned === 0 ? t('card.prunedNow') : t('card.pruned', { n:f.pruned ?? 2 })].join(' · '));
   T('cFruit', t('u.kg', { kg:f.fruit }));
   T('cRipe', pk ? cap(t('card.ripePick', { stage:stg.name, yield:stg.yield, grade:gradeOf(pickQ(s, i)) })) : !f.mature ? t('card.ripeNone') : stg ? t('card.ripeDone')
     : f.fruit >= 1 ? t('card.ripeGrowing', { x:growth(f.moist).toFixed(1), month:monthName(9 + F.late) }) : t('card.ripeRest'));
   T('cCrew', String(f.crew));
-  T('cCrewNote', pk ? t('card.crewNote', { wage:WAGE, rate:rate(s) }) : '');
+  T('cCrewNote', pk ? t('card.crewNote', { wage:WAGE, rate:Math.round(rate(s, i)) }) : '');
   $('crewMinus').disabled = !f.crew; $('crewPlus').disabled = $('crewMax').disabled = !pk || f.crew >= CREW_MAX;
   btn('cWater', t('card.water', { cost:waterCost(s, i) }), whyNot(waterWhy(i)));
   btn('cDrip', f.drip ? t('card.dripDone') : t('card.drip', { cost:dripCost(i) }), whyNot(f.drip ? 'installed' : short(dripCost(i), 'invest')));
   btn('cPlant', t('card.plant', { n:n || 10, cost:(n || 10) * SAPLING }), whyNot(!free ? 'noSlots' : short(n * SAPLING, 'invest')));
+  btn('cPrune', t('card.prune', { cost:pruneCost(s, i) }), whyNot(pruneBlock(s, i)));
   btn('cFill', t('card.fill', { n:free, cost:free * SAPLING }), whyNot(!free ? 'full' : short(free * SAPLING, 'invest')));
 }
 

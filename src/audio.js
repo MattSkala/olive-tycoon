@@ -17,5 +17,6 @@ export const sfx = {
   fanfare:() => [523, 659, 784, 1047].forEach((f, i) => tone(f, .22, i * .1)),
   water:() => [720, 560, 430].forEach((f, i) => tone(f, .09, i * .07)),
   plant:() => tone(110, .18),
+  snip:() => [1500, 1150, 1500].forEach((f, i) => tone(f, .04, i * .1)),
   warn:() => { tone(233, .14); tone(175, .22, .12); },
 };

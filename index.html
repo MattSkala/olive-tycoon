@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Mirsini · Olive Tycoon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
@@ -67,6 +67,7 @@
         <div class="bar soil"><i id="cMoist"></i></div><small id="cWaterNote" class="soil"></small>
         <div class="kv xtra"><span data-i18n="card.healthL"></span><b id="cHealthV"></b></div>
         <div class="bar xtra"><i id="cHealth"></i></div>
+        <div class="kv xtra"><span data-i18n="card.canopyL"></span><b id="cCanopy"></b></div><small id="cCanopyNote" class="xtra"></small>
         <div class="kv xtra"><span data-i18n="card.fruitL"></span><b id="cFruit"></b></div><small id="cRipe" class="xtra"></small>
         <div class="kv" id="cCrewRow"><span data-i18n="card.pickersL"></span><span>
           <button class="round" id="crewMinus" data-a="crew" data-n="-1" data-i18n-aria="card.fewer">−</button>
@@ -77,6 +78,7 @@
         <div class="grid2">
           <button class="blue" id="cWater" data-a="water" data-i18n-title="card.keyW"></button><button class="blue" id="cDrip" data-a="drip"></button>
           <button id="cPlant" data-a="plant" data-n="10" data-i18n-title="card.keyP"></button><button id="cFill" data-a="plant" data-n="999"></button>
+          <button class="wide" id="cPrune" data-a="prune"></button>
         </div>
       </div>
       <div id="cSale">
@@ -115,6 +117,7 @@
     <p data-i18n-html="help.introHtml"></p>
     <p data-i18n-html="help.farmsHtml"></p>
     <p data-i18n-html="help.waterHtml"></p>
+    <p data-i18n-html="help.pruneHtml"></p>
     <p data-i18n-html="help.harvestHtml"></p>
     <p data-i18n-html="help.sellHtml"></p>
     <p class="muted touchonly" data-i18n-html="help.touchHtml"></p>

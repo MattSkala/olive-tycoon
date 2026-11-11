@@ -31,6 +31,7 @@ function resize() {
   controls.maxDistance = 420 * fit();
 }
 addEventListener('resize', resize); resize();
+addEventListener('gesturestart', e => e.preventDefault()); // iOS Safari ignores the viewport's no-zoom and needs this to stop pinch-zooming the page
 camera.position.sub(controls.target).multiplyScalar(fit()).add(controls.target); // the opening view, pulled back on an upright phone
 
 let acc = 0, last = performance.now(), lastMonth = app.s.month, feats = app.s.medals + app.s.green;

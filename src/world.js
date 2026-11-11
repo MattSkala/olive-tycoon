@@ -64,7 +64,7 @@ let NSLOT = 0, NROW = 0;
 const plots = FARMS.map((f, i) => {
   const n = f.cols * f.rows, hw = (f.cols - 1) * SP / 2 + MARGIN, hd = (f.rows - 1) * SP / 2 + MARGIN, [nx, nz, off] = GATE[i];
   const p = { ...f, n, hw, hd, nx, nz, gx:f.x + nx * hw + off * Math.abs(nz), gz:f.z + nz * hd + off * Math.abs(nx), base:NSLOT, row0:NROW,
-    px:new Float32Array(n), pz:new Float32Array(n), key:-1, nM:0, nA:0, nT:0, own:false, pop:1, from:0, shown:50, soilKey:-1, leafKey:-1, olives:-1, stage:'', drip:null };
+    px:new Float32Array(n), pz:new Float32Array(n), key:-1, nM:0, nA:0, nT:0, own:false, crown:1, pop:1, from:0, shown:50, soilKey:-1, leafKey:-1, olives:-1, stage:'', drip:null };
   for (let k = 0; k < n; k++) {
     p.px[k] = f.x + (k % f.cols - (f.cols - 1) / 2) * SP + (rnd(NSLOT + k) - .5) * .8;
     p.pz[k] = f.z + (Math.floor(k / f.cols) - (f.rows - 1) / 2) * SP + (rnd(NSLOT + k + 500) - .5) * .8;
@@ -332,13 +332,15 @@ const RAINH = 90, rain = new THREE.LineSegments(new THREE.BufferGeometry(), new 
 }
 
 function tree(f, k, sc, wob = 0) { // trunk and three silvery blobs make a gnarled olive crown
-  const g = f.base + k, x = f.px[k], z = f.pz[k], sx = (1 + rnd(g + 9) * .3) * sc, sy = (.8 + rnd(g + 17) * .25) * sc;
+  const g = f.base + k, x = f.px[k], z = f.pz[k], cr = k < f.nM ? f.crown : 1; // a pruned crown is smaller and neater, an overgrown one bigger
+  const sx = (1 + rnd(g + 9) * .3) * sc * cr, sy = (.8 + rnd(g + 17) * .25) * sc * cr;
   put(trunkM, g, x, f.y + .85 * sc, z, sc, sc, sc, rnd(g) * 6);
   for (let b = 0; b < 3; b++) {
     const a = rnd(g * 3 + b) * 6.283, r = b ? .85 * sc : 0, bs = b ? .72 : 1;
     put(canopyM, g * 3 + b, x + Math.cos(a) * r + wob, f.y + (2.4 - (b ? .35 : 0)) * sc, z + Math.sin(a) * r, sx * bs, sy * bs, sx * bs, a);
   }
 }
+const CROWN = { tidy:.86, grown:1, wild:1.2 }; // crown size by canopy state (view.farms[i].canopy)
 const treeScale = (f, k) => k < f.nM ? 1 : k < f.nA ? .6 : 0; // mature, older sapling, nothing
 function layoutFarm(f) { // fill order: mature, older saplings, younger saplings, planting holes
   const e = f.pop + Math.sin(f.pop * Math.PI) * .3;
@@ -425,6 +427,8 @@ export const world = {
         if (f.pop >= 1) layoutFarm(f);
         board(i, f, 0, +!vf.own);
       }
+      const crown = CROWN[vf.canopy] || 1;
+      if (crown !== f.crown) { f.crown = crown; if (f.pop >= 1) layoutFarm(f); }
       if (f.pop < 1) { f.pop = Math.min(1, f.pop + dt * 2.5); layoutFarm(f); }
       if (i === buyI) board(i, f, (t - buyT) * 6, +(t - buyT < .6)); // just bought: the board drops
 

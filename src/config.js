@@ -49,6 +49,15 @@ export const DRIP_RATE = .015, DRIP_TO = 70; // drip: cost per tree per point, a
 export const GREEN_DAYS = 10; // dry days a farm may have and still earn the Green Thumb, so reacting to the dry warning is in time
 export const GREEN_PRIZE = 500;
 
+// ---- pruning
+// Olives are pruned in late winter, after the harvest and before the bloom. Trials found that pruning every second year
+// evens out the crop at half the cost of yearly pruning, so a pruning here lasts two seasons and a third year changes nothing.
+export const PRUNE_MONTHS = [1, 2, 3]; // February to April
+export const PRUNE_COST = 5, PRUNE_MIN = 40; // per mature tree, and at least
+export const PRUNE_HEALTH = 10; // health a pruning gives back to neglected trees
+// Canopy state by years since the last pruning (`until`, inclusive). fruit: crop multiplier; pick: picking speed multiplier.
+export const CANOPY = { tidy:{ until:1, fruit:1.1, pick:1.2 }, grown:{ until:2, fruit:1, pick:1 }, wild:{ until:Infinity, fruit:.8, pick:.7 } };
+
 // ---- rivals in the season report: [name, estate value in season 1, yearly growth]
 export const LEAGUE = [['Manolis', 30000, 1.09], ['Kyria Eleni', 60000, 1.07], ['Sitia Agro', 120000, 1.06]];
 
@@ -56,13 +65,14 @@ export const LEAGUE = [['Manolis', 30000, 1.09], ['Kyria Eleni', 60000, 1.07], [
 // x, z: plot centre in the 3D world (the bay is toward -z); y: height of its pad. cols x rows tree slots.
 // old/oldHealth: the mature trees it comes with. fruit, drain, q: multipliers on crop, drying speed and oil quality.
 // late: months its olives ripen after the others. haul: multiplier on the water truck price. rep: reputation needed to buy.
+// pruned: years since its trees were last pruned (see CANOPY).
 export const SP = 3.4, MARGIN = 3; // slot spacing; soil margin around the grid
 export const FARMS = [
-  { name:'Patriko',      x:0,    z:12,  y:0,  cols:10, rows:8,  price:0,     rep:0,  old:60, oldHealth:100, soil:'loam',  fruit:1,    drain:1,   q:1,    late:0, haul:1   },
-  { name:'Kato Chorafi', x:50,   z:12,  y:0,  cols:8,  rows:8,  price:4000,  rep:0,  old:0,  oldHealth:100, soil:'red',   fruit:1.1,  drain:.8,  q:1,    late:0, haul:1   },
-  { name:'Palia Elia',   x:-50,  z:12,  y:0,  cols:8,  rows:7,  price:6000,  rep:0,  old:40, oldHealth:50,  soil:'loam',  fruit:1,    drain:1,   q:1.05, late:0, haul:1   },
-  { name:'Paralia',      x:-15,  z:-84, y:-7, cols:12, rows:9,  price:7500,  rep:15, old:30, oldHealth:70,  soil:'sand',  fruit:.95,  drain:1.4, q:1,    late:0, haul:1.3 },
-  { name:'Kastri',       x:-140, z:22,  y:7,  cols:10, rows:7,  price:9000,  rep:25, old:20, oldHealth:100, soil:'stony', fruit:.85,  drain:1.2, q:1.1,  late:1, haul:1.5 },
-  { name:'Megalo Ktima', x:128,  z:22,  y:-1, cols:12, rows:10, price:18000, rep:40, old:0,  oldHealth:100, soil:'red',   fruit:1.05, drain:.9,  q:1,    late:0, haul:1.3 },
+  { name:'Patriko',      x:0,    z:12,  y:0,  cols:10, rows:8,  price:0,     rep:0,  old:60, oldHealth:100, soil:'loam',  fruit:1,    drain:1,   q:1,    late:0, haul:1,   pruned:2 },
+  { name:'Kato Chorafi', x:50,   z:12,  y:0,  cols:8,  rows:8,  price:4000,  rep:0,  old:0,  oldHealth:100, soil:'red',   fruit:1.1,  drain:.8,  q:1,    late:0, haul:1,   pruned:0 },
+  { name:'Palia Elia',   x:-50,  z:12,  y:0,  cols:8,  rows:7,  price:6000,  rep:0,  old:40, oldHealth:50,  soil:'loam',  fruit:1,    drain:1,   q:1.05, late:0, haul:1,   pruned:6 },
+  { name:'Paralia',      x:-15,  z:-84, y:-7, cols:12, rows:9,  price:7500,  rep:15, old:30, oldHealth:70,  soil:'sand',  fruit:.95,  drain:1.4, q:1,    late:0, haul:1.3, pruned:3 },
+  { name:'Kastri',       x:-140, z:22,  y:7,  cols:10, rows:7,  price:9000,  rep:25, old:20, oldHealth:100, soil:'stony', fruit:.85,  drain:1.2, q:1.1,  late:1, haul:1.5, pruned:2 },
+  { name:'Megalo Ktima', x:128,  z:22,  y:-1, cols:12, rows:10, price:18000, rep:40, old:0,  oldHealth:100, soil:'red',   fruit:1.05, drain:.9,  q:1,    late:0, haul:1.3, pruned:0 },
 ];
 export const DRIP_BASE = 1000, DRIP_SLOT = 20; // drip lines on a farm: base price plus per slot

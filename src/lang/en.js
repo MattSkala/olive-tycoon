@@ -34,6 +34,7 @@ export default {
   // ---- news (toasts)
   'say.farmBought':'{farm} is yours.',
   'say.planted':{ one:'Planted {n} sapling on {farm}.', other:'Planted {n} saplings on {farm}.' },
+  'say.pruned':'{farm} is pruned: more fruit and faster picking for two seasons.',
   'say.drip':'Drip lines installed on {farm}.',
   'say.sold':'Sold {l:num} L for {got:eur}.',
   'say.upgrade':'Bought: {up:up.*.name}.',
@@ -103,6 +104,7 @@ export default {
   'adv.dryIn':{ one:'{farm} will be dry in {n} day. Send the water truck now to keep your Green Thumb.', other:'{farm} will be dry in {n} days. Send the water truck now to keep your Green Thumb.' },
   'adv.orderDue':'The order for {buyer:buyer.*} is due this month: {l} L of {grade:grade.*} or better.',
   'adv.pick':'{farm} has {kg:num} kg of {stage:stage.*} olives. Hire pickers or click the trees.',
+  'adv.prune':'Pruning season: prune {farm} ({cost:eur}) for more fruit and faster picking.',
   'adv.plant':'Plant saplings on {farm} now: the winter rain waters them for free.',
   'adv.afford':'You can afford {farm} ({price:eur}). Click its plot.',
   'adv.drip':'Drip lines on {farm} ({cost:eur}) would end the truck runs.',
@@ -128,6 +130,10 @@ export default {
   'block.owned':'Already yours', 'block.rep':'Needs reputation {rep}', 'block.cash':'Not enough cash',
 
   // ---- farm card
+  'canopy.tidy':'tidy', 'canopy.grown':'grown out', 'canopy.wild':'overgrown',
+  'canopy.tidyNote':'{fruit:pct} more fruit, picking {pick:pct} faster', 'canopy.grownNote':'due for pruning', 'canopy.wildNote':'{fruit:pct} less fruit, picking {pick:pct} slower',
+  'card.canopyL':'Canopy', 'card.prunedNow':'pruned this year', 'card.pruned':{ one:'pruned {n} year ago', other:'pruned {n} years ago' },
+  'card.prune':'✂️ Prune · {cost:eur}',
   'card.close':'Close', 'card.details':'Details', 'card.detailsTip':'Show or hide the farm details',
   'card.treesL':'Trees', 'card.soilL':'Soil', 'card.healthL':'Tree health', 'card.fruitL':'Fruit', 'card.pickersL':'Pickers',
   'card.fewer':'Fewer pickers', 'card.more':'More pickers', 'card.max':'Max', 'card.keyW':'Key W', 'card.keyP':'Key P',
@@ -146,7 +152,7 @@ export default {
   'card.water':'💧 Water · {cost:eur}', 'card.drip':'Install drip · {cost:eur}', 'card.dripDone':'✅ Drip lines',
   'card.plant':'🌱 Plant {n} · {cost:eur}', 'card.fill':'Fill {n} free slots · {cost:eur}',
   'card.why':'{label} ({why})', // a disabled button says why
-  'why.cash':'not enough cash', 'why.noTrees':'no trees', 'why.wet':'soil is wet', 'why.installed':'installed', 'why.noSlots':'no free slots', 'why.full':'full',
+  'why.cash':'not enough cash', 'why.noTrees':'no trees', 'why.wet':'soil is wet', 'why.installed':'installed', 'why.noSlots':'no free slots', 'why.full':'full', 'why.noMature':'no mature trees', 'why.season':'February to April only', 'why.pruned':'pruned this year',
   'card.standsTrees':'{n} mature trees at {health:pct} health', 'card.standsBare':'Bare land',
   'card.stands':'{stands}, with room for {slots} trees. Drip lines here would cost {cost:eur}.',
   'card.buy':'Buy {farm} · {price:eur}',
@@ -163,6 +169,7 @@ export default {
   'help.introHtml':'You inherit Patriko, a grove of 60 Koroneiki olive trees above the Gulf of Mirabello, and {start:eur}. Build an estate worth <b>{goal:eur}</b>: cash, oil, land, trees and equipment all count, so investing never sets you back. Keep cash for upkeep and wages, though: below −{limit:eur} the bank sells your cellar, then forecloses.',
   'help.farmsHtml':'<b>Farms.</b> Click a plot to inspect it. Five more are for sale around the bay, each with its own soil. Buy them, plant saplings (they bear after two new years) and hire a picking crew on each from its card.',
   'help.waterHtml':'<b>Water.</b> The soil dries out in summer. Dry trees grow little fruit, parched trees sicken and saplings wither. Send the water truck with the 💧 button on a farm, or install drip lines and it waters itself. Winter rain is free.',
+  'help.pruneHtml':'<b>Pruning.</b> From February to April you can prune a farm\'s trees. A tidy canopy bears more fruit and is quicker to pick for two seasons, so prune every second year. Left alone, trees grow wild: less fruit and slow picking.',
   'help.harvestHtml':'<b>Harvest</b> (October to January): click trees to pick by hand, quick clicks build a combo, or hire pickers. Early olives give little oil of the finest grade; late olives give more oil of a lower grade, and fruit keeps dropping while you wait.',
   'help.sellHtml':'<b>Sell</b> on the market in slices, since big lots push the price down, or take <b>contracts</b> from the village: they pay much more but demand a grade and a deadline. <b>Reputation</b> raises all your prices and unlocks the better farms.',
   'help.touchHtml':'Touch: drag to move around, pinch to zoom, twist two fingers to rotate. Tap a plot to select it, tap ripe trees to pick them, tap empty ground to close the farm card.',

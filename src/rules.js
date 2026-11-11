@@ -5,7 +5,7 @@ import {
   DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, HOME_VALUE, OIL_VALUE, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, PICK, HAND_PICK, CREW_MAX,
   MILL_FEE, TREE_KG, UPGRADES, PRESS_QUALITY, BOTTLING_PRICE, SHAKER_SPEED, STAGE, DROP, GRADE_MIN, MEDALS, PRICE_HARVEST, PRICE_NORMAL, PRICE_MIN,
   MARKET_DEPTH, BUYERS, MAX_ORDERS, EVAP, RAINP, RAIN_GAIN, BAND_MIN, TRUCK, TRUCK_MIN, DRIP_RATE, DRIP_TO, GREEN_DAYS, GREEN_PRIZE, LEAGUE, FARMS,
-  DRIP_BASE, DRIP_SLOT,
+  DRIP_BASE, DRIP_SLOT, PRUNE_MONTHS, PRUNE_COST, PRUNE_MIN, PRUNE_HEALTH, CANOPY,
 } from './config.js';
 
 // ---------- state ----------
@@ -30,6 +30,7 @@ export const newGame = () => ({
   farms:FARMS.map((F, i) => ({
     own:!i, mature:F.old, sap:[0, 0], // saplings: [mature next January, the January after]
     fruit:i ? 0 : 3240, moist:i ? 50 : 30, health:F.oldHealth, drip:false, crew:0,
+    pruned:F.pruned, // years since the last pruning
     lastWater:-1, dryDays:i ? 0 : 1, kg:0, water:0, // this season: dry days, kg picked, money spent on water
     warn:i ? '' : 'dry', // last band the player was alerted about
   })),
@@ -63,7 +64,9 @@ export const upkeep = s => sumOwned(s, f => f.mature * UPKEEP_TREE + young(f) * 
 export const matureAll = s => sumOwned(s, f => f.mature);
 export const fruitAll = s => sumOwned(s, f => f.fruit);
 export const crewTotal = s => sumOwned(s, f => f.crew);
-export const potential = (s, i) => s.farms[i].mature * TREE_KG * FARMS[i].fruit * s.farms[i].health / 100;
+/** Canopy state of a farm's trees: 'tidy', 'grown' or 'wild' (see CANOPY). A save from before pruning existed counts as grown. */
+export const canopyOf = f => Object.keys(CANOPY).find(k => (f.pruned ?? 2) <= CANOPY[k].until);
+export const potential = (s, i) => s.farms[i].mature * TREE_KG * FARMS[i].fruit * s.farms[i].health / 100 * CANOPY[canopyOf(s.farms[i])].fruit;
 /** How full the trees look, 0..1 (1 = the best crop lush soil can give). */
 export const fruitFrac = (s, i) => s.farms[i].mature ? Math.min(1, s.farms[i].fruit / (s.farms[i].mature * TREE_KG * FARMS[i].fruit * 1.3)) : 0;
 export const stageOf = (s, i) => STAGE[(s.month - FARMS[i].late + 12) % 12];
@@ -84,6 +87,9 @@ export function farmStatus(s, i) {
 /** Owned farms with trees, no drip and dry soil, driest first. */
 export const thirsty = s => owned(s).filter(i => trees(s.farms[i]) && !s.farms[i].drip && s.farms[i].moist < BAND_MIN.good).sort((a, b) => s.farms[a].moist - s.farms[b].moist);
 export const dripCost = i => DRIP_BASE + DRIP_SLOT * slots(i);
+export const pruneCost = (s, i) => Math.max(PRUNE_MIN, PRUNE_COST * s.farms[i].mature);
+/** Why a farm cannot be pruned now: '' (it can), 'noMature', 'season', 'pruned' (already this year) or 'cash'. */
+export const pruneBlock = (s, i) => !s.farms[i].mature ? 'noMature' : !PRUNE_MONTHS.includes(s.month) ? 'season' : s.farms[i].pruned === 0 ? 'pruned' : canPay(s, pruneCost(s, i)) ? '' : 'cash';
 export const waterCost = (s, i) => Math.max(TRUCK_MIN, TRUCK * trees(s.farms[i])) * FARMS[i].haul * (s.heat > 0 ? 2 : 1) * (s.up.borehole ? .5 : 1);
 /** Why a farm cannot be bought: '' (it can), 'owned', 'rep' or 'cash'. */
 export const buyBlock = (s, i) => s.farms[i].own ? 'owned' : s.rep < FARMS[i].rep ? 'rep' : canPay(s, FARMS[i].price, 'invest') ? '' : 'cash';
@@ -94,7 +100,7 @@ export const worth = s => s.cash + OIL_VALUE * s.oil + sumOwned(s, (f, i) => (FA
   + Object.keys(s.up).reduce((a, k) => a + UPGRADES[k].cost / 2, 0);
 /** Rank index for an estate value, 0 = smallholder .. 4 = olive baron (names: lang `title.N`). */
 export const rankOf = w => w < 25000 ? 0 : w < 75000 ? 1 : w < 150000 ? 2 : w < GOAL ? 3 : 4;
-export const rate = s => PICK * (s.up.shakers ? SHAKER_SPEED : 1); // kg a picker picks in a month
+export const rate = (s, i) => PICK * (s.up.shakers ? SHAKER_SPEED : 1) * CANOPY[canopyOf(s.farms[i])].pick; // kg a picker picks on farm i in a month
 export const sellPrice = s => s.price * s.oilQ * (s.up.bottling ? BOTTLING_PRICE : 1) * (1 + s.rep / 200);
 const dip = (s, l) => Math.max(PRICE_MIN, s.price - l / MARKET_DEPTH); // market depth: a big lot pushes the price down, so big estates sell in slices
 /** What selling `l` litres would pay now. */
@@ -122,6 +128,14 @@ export function water(s, i) {
   f.moist = 100; f.lastWater = s.t; f.water += c; s.watered++;
   return true;
 }
+/** Prunes every mature tree on the farm: a tidy canopy for two seasons, and a little health back. */
+export function prune(s, i) {
+  const f = s.farms[i];
+  if (!f.own || pruneBlock(s, i) || !pay(s, pruneCost(s, i), 'upkeep')) return false;
+  f.pruned = 0; f.health = Math.min(100, f.health + PRUNE_HEALTH);
+  say('say.pruned', { farm:FARMS[i].name });
+  return true;
+}
 export function buyDrip(s, i) {
   const f = s.farms[i];
   if (!f.own || f.drip || !pay(s, dripCost(i), 'invest')) return false;
@@ -139,7 +153,7 @@ export function pick(s, i, kg) {
   s.oil += l; f.fruit -= kg; f.kg += kg; s.pressed += l; s.seasonL += l; s.seasonQ += l * q;
   return kg;
 }
-export const handPick = (s, i, mult = 1) => pick(s, i, HAND_PICK * (s.up.shakers ? SHAKER_SPEED : 1) * Math.max(1, Math.min(3, mult)));
+export const handPick = (s, i, mult = 1) => pick(s, i, HAND_PICK * rate(s, i) / PICK * Math.max(1, Math.min(3, mult))); // shakers and a tidy canopy help the hand too
 export const setCrew = (s, i, n) => s.farms[i].crew = canPick(s, i) ? Math.max(0, Math.min(CREW_MAX, n)) || 0 : 0;
 export const setCrewAll = (s, n) => s.farms.forEach((f, i) => canPick(s, i) && setCrew(s, i, n));
 /** Sells `l` litres on the market; returns the cash received. */
@@ -276,6 +290,8 @@ export function advice(s) {
   if (!crewTotal(s) && (i = own.filter(i => canPick(s, i)).sort((a, b) => s.farms[b].fruit - s.farms[a].fruit)[0]) >= 0)
     return tell('adv.pick', { farm:FARMS[i].name, kg:s.farms[i].fruit, stage:stageOf(s, i).name }, i);
   if (s.cash < 0) return tell('adv.overdrawnEmpty', { limit:-OVERDRAFT });
+  if (PRUNE_MONTHS.includes(m) && (i = own.find(i => canopyOf(s.farms[i]) !== 'tidy' && !pruneBlock(s, i) && s.cash >= pruneCost(s, i) + 1000)) >= 0)
+    return tell('adv.prune', { farm:FARMS[i].name, cost:pruneCost(s, i) }, i);
   if ((m >= 9 || m <= 2) && s.cash >= reserve && (i = own.find(i => freeSlots(s, i) >= 10)) >= 0) return tell('adv.plant', { farm:FARMS[i].name }, i);
   if ((i = forSale(s)[0]) >= 0 && s.cash >= FARMS[i].price + reserve) return tell('adv.afford', { farm:FARMS[i].name, price:FARMS[i].price }, i);
   if ((i = own.find(i => trees(s.farms[i]) >= 30 && !s.farms[i].drip && s.cash >= dripCost(i) + reserve)) >= 0) return tell('adv.drip', { farm:FARMS[i].name, cost:dripCost(i) }, i);
@@ -296,7 +312,7 @@ function monthStart(s) {
     s.year++;
     const n = sumOwned(s, f => f.sap[0]);
     if (n) say('say.matured', { n }, 'good');
-    for (const i of own) { const f = s.farms[i]; f.mature += f.sap[0]; f.sap = [f.sap[1], 0]; }
+    for (const i of own) { const f = s.farms[i]; f.mature += f.sap[0]; f.sap = [f.sap[1], 0]; f.pruned = (f.pruned ?? 2) + 1; }
   }
   if (m === 1) seasonEnd(s, own);
   if (m === 9) {
@@ -367,7 +383,7 @@ function farmDay(s, i) {
   if (st && st.name !== 'green') f.fruit *= DROP;
   if (f.crew && canPick(s, i) && !pay(s, f.crew * WAGE / DAYS, 'wages')) { f.crew = 0; say('say.crewUnpaid', {}, 'warn'); }
   if (f.crew) {
-    pick(s, i, f.crew * rate(s) / DAYS);
+    pick(s, i, f.crew * rate(s, i) / DAYS);
     if (!canPick(s, i)) { f.crew = f.fruit = 0; say('say.stripped', { farm:FARMS[i].name }); }
   }
   // alert once on entering dry and once on entering parched; climbing back from parched to dry is not news

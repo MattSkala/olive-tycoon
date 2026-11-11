@@ -3,7 +3,7 @@
 import { DAYS, GOAL, SAPLING, PICK, CREW_MAX, UPGRADES, FARMS } from '../src/config.js';
 import {
   newGame, listen, total, slots, trees, freeSlots, owned, upkeep, matureAll, stageOf, canPick, growth, dripCost, forSale, worth, sellPrice,
-  buyFarm, plant, water, buyDrip, setCrew, sell, upgrade, accept, canDeliver, deliver, decide, shoo, advice, stepDay,
+  buyFarm, plant, water, buyDrip, prune, pruneCost, pruneBlock, canopyOf, potential, setCrew, sell, upgrade, accept, canDeliver, deliver, decide, shoo, advice, stepDay,
 } from '../src/rules.js';
 
 // self-check (node): unit asserts, then four bots play 20 years each with every invariant checked daily
@@ -28,6 +28,14 @@ ok(canPick(s, 4) && stageOf(s, 4).name === 'ripe', 'a late farm is ripe in Janua
 s.oil = 3000;
 const quoted = 3000 * sellPrice(s), got = sell(s, 3000);
 ok(got > 0 && got < quoted && Math.abs(s.price - 10) < 1e-9 && !s.oil, 'market depth');
+s = newGame(); s.month = 8;
+ok(canopyOf(s.farms[0]) === 'grown' && !prune(s, 0) && pruneBlock(s, 0) === 'season' && s.cash === 5000, 'no pruning outside February to April');
+s.month = 1;
+const before = potential(s, 0);
+ok(prune(s, 0) && s.cash === 5000 - pruneCost(s, 0) && canopyOf(s.farms[0]) === 'tidy' && Math.abs(potential(s, 0) / before - 1.1) < 1e-9, 'pruning tidies the canopy and lifts the crop');
+ok(!prune(s, 0) && pruneBlock(s, 0) === 'pruned', 'one pruning a year');
+s.farms[0].pruned = 3;
+ok(canopyOf(s.farms[0]) === 'wild' && potential(s, 0) < before, 'an unpruned grove grows wild and bears less');
 s = newGame(); s.cash = -3500; s.oil = 500; s.day = DAYS - 1; stepDay(s);
 ok(!s.over && !s.oil && s.cash > 0, 'the bank sells the cellar before it forecloses');
 s.cash = -3500; s.event = null; s.day = DAYS - 1; stepDay(s);
@@ -50,6 +58,7 @@ const bot = o => {
       const f = s.farms[i];
       if (canPick(s, i) && stageOf(s, i).name !== 'green') setCrew(s, i, Math.min(CREW_MAX, Math.ceil(f.fruit / PICK)));
       if (o.water && m >= 4 && m <= 8 && !f.drip && f.moist < 40) water(s, i);
+      if (o.grow && f.pruned >= 2 && spare() >= pruneCost(s, i)) prune(s, i); // every second year
     }
     // the builders only sign what is already in the cellar; the home-farm bots sign anything, to exercise missed orders
     const k = o.grow ? s.offers.findIndex(x => canDeliver(s, x)) : 0;
