@@ -22,7 +22,7 @@ export function ledgerHTML(books) {
   return box('rep.income', 'in', ['sales', 'contracts', 'prizes']) + box('rep.costs', 'out', ['wages', 'mill', 'upkeep', 'water', 'invest', 'events']);
 }
 
-// Each draws the body of its panel; the title in the banner is the string `<name>.title`.
+// Each draws the body of its panel; the title in the header is the string `<name>.title`.
 export const DETAILS = {
   // what the estate value is made of, and the ranks on the way to the goal
   estate(s) {
