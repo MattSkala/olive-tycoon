@@ -65,6 +65,9 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 /* ---- middle: objective and farm list on the left, the selected farm's card on the right */
 #mid { flex:1; min-height:0; display:flex; gap:10px; align-items:flex-start; }
 #left { width:262px; max-height:100%; display:flex; flex-direction:column; gap:10px; }
+/* Beside the map, the left column runs from the estate card straight down to the season card. The top row is taller than the estate card when the
+   resource pills wrap, and the bottom row is as tall as the market card: --up and --down (set by hud.js) are those two differences. */
+@media (min-width:701px) { #left { margin-top:calc(-1 * var(--up, 0px)); max-height:calc(100% + var(--up, 0px) + var(--down, 0px)); } }
 #goal h3 { margin:0 0 6px; font-size:16px; }
 .task { display:flex; gap:8px; justify-content:space-between; align-items:flex-start; background:var(--well); border-radius:12px; padding:8px 10px; font-size:14px; }
 #adv { display:flex; gap:6px; justify-content:space-between; align-items:flex-start; width:100%; margin-top:8px; padding:0; text-align:left; background:none; border:0; box-shadow:none; color:var(--ink); font-weight:500; font-size:13.5px; }

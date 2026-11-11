@@ -69,6 +69,8 @@ export function viewOf(frac) {
   const s = app.s;
   vw.month = s.month; vw.day = s.day + frac; vw.speed = app.speed; vw.rain = s.rain > 0; vw.heat = s.heat > 0; vw.overlay = app.overlay;
   const nw = narrow.matches; // on an upright phone the objective card lies across the top and there are no side docks
+  const up = nw ? 0 : $('top').offsetHeight - $('estate').offsetHeight, down = nw ? 0 : $('bottom').offsetHeight - $('season').offsetHeight; // see #left in the stylesheet
+  if (up !== vw.up || down !== vw.down) { vw.up = up; vw.down = down; $('hud').style.setProperty('--up', up + 'px'); $('hud').style.setProperty('--down', down + 'px'); }
   vw.inset = [nw ? 0 : $('left').offsetWidth + 14, app.sel >= 0 && !nw ? 332 : 0, $('mid').offsetTop + (nw ? $('left').offsetHeight : 0),
     innerHeight - Math.min($('bottom').getBoundingClientRect().top, nw && !$('card').hidden ? $('card').getBoundingClientRect().top : innerHeight)]; // px the docks cover: left, right, top, bottom
   vw.selected = app.sel; vw.hover = app.hover; vw.oil = s.oil; vw.rep = s.rep; vw.up = s.up; vw.goats = s.goats; vw.pressing = false;
