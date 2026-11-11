@@ -200,7 +200,7 @@ kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; 
   .ic { width:26px; height:26px; font-size:13px; }
   #mid { flex-direction:column; align-items:stretch; } #left { width:auto; }
   #goal { padding:5px 7px 5px; } .task { font-size:12.5px; padding:4px 8px; } #goal .bar { height:5px; margin-top:4px; } #adv { font-size:12.5px; margin-top:4px; }
-  #goalT { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; } #advT { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } /* the advice is one line: a tap goes there anyway */
+  #goal { max-height:32vh; overflow-y:auto; overscroll-behavior:contain; } #advT { min-width:0; } /* objective and advice show in full, on as many lines as they need; a very long one scrolls inside the card */
   #card { width:auto; max-height:70%; } #card.more { max-height:100%; } #hud:has(#card.more:not([hidden])) #left { display:none; } /* Details borrows the objective card's room */
   .toast { font-size:13px; padding:5px 11px; border-radius:14px; } .toast:nth-last-child(n+3) { display:none; }
   #bottom { display:grid; grid-template-columns:1fr; gap:6px; align-items:stretch; }
