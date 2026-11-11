@@ -14,7 +14,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure
 export const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xf0dcc0, 300, 1300);
 export const camera = new THREE.PerspectiveCamera(30, 1, 2, 3500);
-camera.position.set(-45, 95, 150);
+camera.position.set(-150, 64, 58); // from the west, low: the terraces climb the hill in profile and the bay lies to the left
 export const controls = new OrbitControls(camera, canvas);
 controls.target.set(0, 0, 5);
 controls.enableDamping = true; controls.screenSpacePanning = false; controls.keyPanSpeed = 25;
@@ -60,21 +60,31 @@ const vcol = new THREE.MeshLambertMaterial({ vertexColors:true }), vcol2 = new T
 
 // plots: farm table plus derived geometry and what the scene currently shows
 const GATE = [[0, -1, 8.5], [0, -1, 0], [0, -1, 0], [0, 1, 0], [1, 0, 0], [-1, 0, 0]]; // gate edge normal, offset along it (the farmhouse blocks Patriko's centre)
+// Terraces: every farm climbs a slope in steps, one terrace per tree row (per column where the hill rises sideways): [ascent x, ascent z, step height].
+const TERRACE = [[0, 1, 1.7], [0, 1, 1.7], [0, 1, 1.7], [0, 1, 1.4], [-1, 0, 1.6], [0, 1, 1.1]], LIFT = .6; // LIFT: how far (in steps) the terraces stand above the ground plane under them
+// the hillside behind the farmhouse that Patriko and its two neighbours climb, one step per row; the road and the buildings stay on the flat below it
+const hill = (x, z) => TERRACE[0][2] / SP * clamp(z + 3, 0, 40) * (1 - sstep(80, 105, Math.abs(x))); // it crests just above the top terraces
 let NSLOT = 0, NROW = 0;
 const plots = FARMS.map((f, i) => {
+  const [tx, tz, step] = TERRACE[i], nt = tx ? f.cols : f.rows, tc = (nt - 1) / 2; // terraces, and the middle one
   const n = f.cols * f.rows, hw = (f.cols - 1) * SP / 2 + MARGIN, hd = (f.rows - 1) * SP / 2 + MARGIN, [nx, nz, off] = GATE[i];
-  const p = { ...f, n, hw, hd, nx, nz, gx:f.x + nx * hw + off * Math.abs(nz), gz:f.z + nz * hd + off * Math.abs(nx), base:NSLOT, row0:NROW,
-    px:new Float32Array(n), pz:new Float32Array(n), key:-1, nM:0, nA:0, nT:0, own:false, crown:1, pop:1, from:0, shown:50, soilKey:-1, leafKey:-1, olives:-1, stage:'', drip:null };
+  const p = { ...f, y:f.y || hill(f.x, f.z) + LIFT * step, tx, tz, step, nt, n, hw, hd, nx, nz, gx:f.x + nx * hw + off * Math.abs(nz), gz:f.z + nz * hd + off * Math.abs(nx), base:NSLOT, row0:NROW,
+    px:new Float32Array(n), py:new Float32Array(n), pz:new Float32Array(n), key:-1, nM:0, nA:0, nT:0, own:false, crown:1, pop:1, from:0, shown:50, soilKey:-1, leafKey:-1, olives:-1, stage:'', drip:null };
   for (let k = 0; k < n; k++) {
     p.px[k] = f.x + (k % f.cols - (f.cols - 1) / 2) * SP + (rnd(NSLOT + k) - .5) * .8;
     p.pz[k] = f.z + (Math.floor(k / f.cols) - (f.rows - 1) / 2) * SP + (rnd(NSLOT + k + 500) - .5) * .8;
   }
-  NSLOT += n; NROW += f.rows;
+  const along = (x, z) => ((x - f.x) * tx + (z - f.z) * tz) / SP; // how far up the slope from the plot's centre, in terraces
+  p.h = (x, z) => p.y + step * (clamp(Math.round(along(x, z) + tc), 0, nt - 1) - tc); // height of the terrace at a point
+  p.under = (x, z) => p.y + step * (along(clamp(x, f.x - hw, f.x + hw), clamp(z, f.z - hd, f.z + hd)) - LIFT); // a plane just below every terrace: the terrain inside the plot
+  for (let k = 0; k < n; k++) p.py[k] = p.h(p.px[k], p.pz[k]);
+  p.gy = p.h(p.gx, p.gz); // the gate
+  NSLOT += n; NROW += nt;
   return p;
 });
 const inPlot = (x, z, m) => plots.some(f => Math.abs(x - f.x) < f.hw + m && Math.abs(z - f.z) < f.hd + m);
 
-// terrain height: flat farm terrace, slope down to the bay behind it, mountains to the left and across the water
+// terrain height: a flat bench for the road and buildings, the home hill rising behind it, the slope down to the bay in front, mountains to the left and across the water
 let edge = 0; // distance outside the plateau of the last point sampled
 function H(x, z) {
   const d = edge = Math.hypot(Math.max(Math.abs(x) - 78, 0), z < -26 ? -26 - z : Math.max(z - 72, 0));
@@ -83,7 +93,11 @@ function H(x, z) {
   h += sstep(-330, -430, z) * (70 + 25 * Math.sin(x * .012));
   h += 26 * Math.exp(-((x - 70) ** 2 + (z + 235) ** 2) / 700); // the islet in the bay
   h *= sstep(0, 70, d);
-  for (const f of plots) if (f.y) h = f.y + (h - f.y) * sstep(6, 22, Math.max(Math.abs(x - f.x) - f.hw, Math.abs(z - f.z) - f.hd)); // flattened pads off the plateau
+  h += hill(x, z);
+  for (const f of plots) { // in and around a plot the ground is the plane its terraces stand on
+    const e = Math.max(Math.abs(x - f.x) - f.hw, Math.abs(z - f.z) - f.hd);
+    if (e < 22) { const u = f.under(x, z); h = u + (h - u) * sstep(2, 22, e); }
+  }
   return h;
 }
 // height of the terrain mesh itself: its 5-unit triangles cut corners that H rounds, so anything standing on a slope uses this
@@ -287,14 +301,24 @@ const tankM = pool(merge([cyl(.9, .9, 1.5, 10).translate(0, 1.85, 0), 0x3f6f96],
   ...[[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5]].map(([x, z]) => [box(.14, 1.1, .14, x, .55, z), 0x5a3d22])), tankMat, 6);
 const dripM = pool(box(1, .08, .16), lam(0x2a2a2a), NROW, false);
 for (const f of plots) {
-  const g = flatGeo(f.hw * 2, f.hd * 2), uv = g.attributes.uv;
-  for (let i = 0; i < uv.count; i++) uv.setY(i, uv.getY(i) * f.hd * 4 / SP); // two furrows per tree row
+  // terraces: a strip of soil per level and, under it, a block of dry-stone whose face shows as the retaining wall
+  const tops = [], blocks = [], up = f.tx ? f.hw : f.hd, across = f.tx ? f.hd : f.hw, tc = (f.nt - 1) / 2; // half-sizes up the slope and along the contour
+  for (let j = 0; j < f.nt; j++) {
+    const a = j ? (j - tc - .5) * SP : -up, b = j < f.nt - 1 ? (j - tc + .5) * SP : up, m = (a + b) / 2, y = f.step * (j - tc);
+    const w = f.tx ? b - a : across * 2, d = f.tx ? across * 2 : b - a, top = flatGeo(w, d).translate(f.tx * m, y, f.tz * m).toNonIndexed(), uv = top.attributes.uv, pos = top.attributes.position;
+    for (let k = 0; k < uv.count; k++) uv.setY(k, (pos.getX(k) * f.tx + pos.getZ(k) * f.tz) * 2 / SP); // two furrows per tree row, running along the terrace
+    tops.push(top); blocks.push([box(w, f.step * 3, d, f.tx * m, y - f.step * 1.5 - .02, f.tz * m), 0xa59c88]);
+    if (j) blocks.push([box(f.tx ? .6 : w, .5, f.tx ? d : .6, f.tx * (a + .3), y + .2, f.tz * (a + .3)), 0xd2c9b4]); // a low parapet on its downhill edge, so the steps read from uphill too
+  }
+  const g = new THREE.BufferGeometry();
+  for (const [name, size] of [['position', 3], ['normal', 3], ['uv', 2]]) g.setAttribute(name, new THREE.Float32BufferAttribute(tops.flatMap(top => [...top.attributes[name].array]), size));
   f.ground = add(g, new THREE.MeshLambertMaterial({ map:furrow }), f.x, f.y + .06, f.z); f.ground.castShadow = false;
+  add(merge(...blocks), vcol, f.x, f.y, f.z);
   for (const [ex, ez] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (let len = ex ? f.hd : f.hw, a = -len, l; a < len; a += l) {
     l = Math.min(1.2 + rnd(wallM.count) * .8, len - a + .35); // the last stone just turns the corner
     const x = f.x + ex * f.hw + (ex ? 0 : a + l / 2), z = f.z + ez * f.hd + (ez ? 0 : a + l / 2), n = wallM.count;
     if (ex === f.nx && ez === f.nz && Math.hypot(x - f.gx, z - f.gz) < 2.3) continue; // the gate
-    put(wallM, n, x, f.y + .4, z, ex ? .75 : l, .7 + rnd(n + 3) * .35, ex ? l : .75);
+    put(wallM, n, x, f.h(x, z) + .4, z, ex ? .75 : l, .7 + rnd(n + 3) * .35, ex ? l : .75);
     wallM.setColorAt(n, c1.setHSL(.1, .1, .5 + rnd(n + 7) * .16)); wallM.count++;
   }
 }
@@ -303,8 +327,11 @@ const outline = hex => { // a flat square frame, scaled to a plot
   m.visible = false; scene.add(m); return m;
 };
 const selO = outline(0xffd23c), hovO = outline(0xffffff);
-const board = (i, f, drop, on) => put(boardM, i, f.gx + f.nx * 2 - f.nz * 3.4, f.y - drop, f.gz + f.nz * 2 + f.nx * 3.4, on, on, on, Math.atan2(f.nx, f.nz)); // for sale, beside the gate
-const frameOn = (m, f, grow, op) => { m.position.set(f.x, f.y + .35, f.z); m.scale.set((f.hw * 2 + 3) * grow, 1, (f.hd * 2 + 3) * grow); m.material.opacity = op; };
+const board = (i, f, drop, on) => put(boardM, i, f.gx + f.nx * 2 - f.nz * 3.4, f.gy - drop, f.gz + f.nz * 2 + f.nx * 3.4, on, on, on, Math.atan2(f.nx, f.nz)); // for sale, beside the gate
+const frameOn = (m, f, grow, op) => { // tilted to lie along the terraces
+  const tilt = Math.atan(f.step / SP);
+  m.position.set(f.x, f.y + f.step * .6 + .35, f.z); m.rotation.set(-f.tz * tilt, 0, f.tx * tilt); m.scale.set((f.hw * 2 + 3) * grow, 1, (f.hd * 2 + 3) * grow); m.material.opacity = op;
+};
 
 // one Points pool for every puff: spray, dust, smoke, flames, fireworks
 const PN = 800, pPos = new Float32Array(PN * 3).fill(-999), pCol = new Float32Array(PN * 3), pVel = new Float32Array(PN * 4), pLife = new Float32Array(PN);
@@ -334,10 +361,10 @@ const RAINH = 90, rain = new THREE.LineSegments(new THREE.BufferGeometry(), new 
 function tree(f, k, sc, wob = 0) { // trunk and three silvery blobs make a gnarled olive crown
   const g = f.base + k, x = f.px[k], z = f.pz[k], cr = k < f.nM ? f.crown : 1; // a pruned crown is smaller and neater, an overgrown one bigger
   const sx = (1 + rnd(g + 9) * .3) * sc * cr, sy = (.8 + rnd(g + 17) * .25) * sc * cr;
-  put(trunkM, g, x, f.y + .85 * sc, z, sc, sc, sc, rnd(g) * 6);
+  put(trunkM, g, x, f.py[k] + .85 * sc, z, sc, sc, sc, rnd(g) * 6);
   for (let b = 0; b < 3; b++) {
     const a = rnd(g * 3 + b) * 6.283, r = b ? .85 * sc : 0, bs = b ? .72 : 1;
-    put(canopyM, g * 3 + b, x + Math.cos(a) * r + wob, f.y + (2.4 - (b ? .35 : 0)) * sc, z + Math.sin(a) * r, sx * bs, sy * bs, sx * bs, a);
+    put(canopyM, g * 3 + b, x + Math.cos(a) * r + wob, f.py[k] + (2.4 - (b ? .35 : 0)) * sc, z + Math.sin(a) * r, sx * bs, sy * bs, sx * bs, a);
   }
 }
 const CROWN = { tidy:.86, grown:1, wild:1.2 }; // crown size by canopy state (view.farms[i].canopy)
@@ -347,13 +374,20 @@ function layoutFarm(f) { // fill order: mature, older saplings, younger saplings
   for (let k = 0; k < f.n; k++) {
     const g = f.base + k, grow = k >= f.from ? e : 1;
     tree(f, k, treeScale(f, k) * grow);
-    put(sapM, g, f.px[k], f.y, f.pz[k], k >= f.nA && k < f.nT ? grow : 0);
-    put(holeM, g, f.px[k], f.y + .09, f.pz[k], f.own && k >= f.nT ? 1 : 0);
+    put(sapM, g, f.px[k], f.py[k], f.pz[k], k >= f.nA && k < f.nT ? grow : 0);
+    put(holeM, g, f.px[k], f.py[k] + .09, f.pz[k], f.own && k >= f.nT ? 1 : 0);
   }
   touch(trunkM, canopyM, sapM, holeM);
 }
+// where the pick ray meets a plot's terraces, `lift` above them: [x, z], or null if that is behind the camera (the slopes are gentle, so a few rounds settle it)
+function onPlot(f, lift = 0) {
+  const r = caster.ray;
+  let x = f.x, z = f.z, u = 0;
+  for (let k = 0; k < 3; k++) { u = (f.h(x, z) + lift - r.origin.y) / r.direction.y; x = r.origin.x + r.direction.x * u; z = r.origin.z + r.direction.z * u; }
+  return u > 0 ? [x, z] : null;
+}
 function nearTree(f) { // slot of the mature tree whose crown the pick ray passes within 2 units of, or -1
-  const r = caster.ray, u = (f.y + 2.2 - r.origin.y) / r.direction.y, x = r.origin.x + r.direction.x * u, z = r.origin.z + r.direction.z * u;
+  const p = onPlot(f, 2.2), u = +!!p, [x, z] = p || [0, 0];
   const c = Math.round((x - f.x) / SP + (f.cols - 1) / 2), w = Math.round((z - f.z) / SP + (f.rows - 1) / 2);
   let best = -1, bd = 2;
   if (u > 0) for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
@@ -380,7 +414,7 @@ function aimSun(h, dist) { // the light follows the camera target, snapped to sh
 }
 
 const caster = new THREE.Raycaster(), ndc = new THREE.Vector2(), aim = (cx, cy) => caster.setFromCamera(ndc.set(cx / innerWidth * 2 - 1, 1 - cy / innerHeight * 2), camera);
-const HOME = new THREE.Vector3(-45, 95, 145).normalize();
+const HOME = new THREE.Vector3(-150, 64, 53).normalize();
 const fly = { on:false, t0:0, a:new THREE.Vector3(), b:new THREE.Vector3(), da:new THREE.Vector3(), db:new THREE.Vector3(), d0:0, d1:0 };
 controls.addEventListener('start', () => { fly.on = false; }); // a drag cancels the flight
 const truckT = [-9, -9, -9, -9, -9, -9], goatAt = new Float32Array(15), goatId = [0, 1, 2, 3, 4], shake = { f:null, k:0, t0:0 };
@@ -389,6 +423,7 @@ let tNow = 0, rainK = 0, heatK = 0, ovK = 0, crewOn = false, goatN = 0, goatHit 
 export const world = {
   update(view, t, dt) {
     tNow = t;
+    camera.position.y = Math.max(camera.position.y, G(camera.position.x, camera.position.z) + 6); // never under the hillside; the controls carry on from here
     // camera: fly-to, then keep the target on the estate and the fog beyond it
     const tg = controls.target;
     if (fly.on) {
@@ -459,15 +494,18 @@ export const world = {
         c1.set(OLIVE_COLOR[st]);
         for (let j = all ? 0 : Math.min(no, f.olives); j < hi; j++) {
           const kk = Math.floor(j / 5), q = j % 5, g = f.base + kk, sx = 1 + rnd(g + 9) * .3, a = q / 5 * 6.283 + rnd(g * 7 + q) * .8;
-          put(oliveM, f.base * 5 + j, f.px[kk] + Math.cos(a) * 1.25 * sx, f.y + 2.3 + (rnd(g * 13 + q) - .45) * 1.2 * (.8 + rnd(g + 17) * .25), f.pz[kk] + Math.sin(a) * 1.25 * sx, j < no ? 1 : 0);
+          put(oliveM, f.base * 5 + j, f.px[kk] + Math.cos(a) * 1.25 * sx, f.py[kk] + 2.3 + (rnd(g * 13 + q) - .45) * 1.2 * (.8 + rnd(g + 17) * .25), f.pz[kk] + Math.sin(a) * 1.25 * sx, j < no ? 1 : 0);
           oliveM.setColorAt(f.base * 5 + j, c1);
         }
         f.olives = no; f.stage = st; touch(oliveM); oliveM.instanceColor.needsUpdate = true;
       }
       if (vf.drip !== f.drip) { // one line per row and a tank outside the wall by the gate, where no tree can reach it
         f.drip = vf.drip;
-        for (let r = 0; r < f.rows; r++) put(dripM, f.row0 + r, f.x, f.y + .12, f.z + (r - (f.rows - 1) / 2) * SP + .6, vf.drip ? f.hw * 2 - 3 : 0, +vf.drip, +vf.drip);
-        put(tankM, i, f.gx + f.nx * 1.9 + f.nz * 3.6, f.y, f.gz + f.nz * 1.9 + Math.abs(f.nx) * 3.6, vf.drip ? 1 : 0); // on the +z side of the hill gates: their tracks come in from -z
+        for (let j = 0; j < f.nt; j++) { // one line along each terrace
+          const m = (j - (f.nt - 1) / 2) * SP + .6, x = f.x + f.tx * m, z = f.z + f.tz * m;
+          put(dripM, f.row0 + j, x, f.h(x, z) + .12, z, vf.drip ? (f.tx ? f.hd : f.hw) * 2 - 3 : 0, +vf.drip, +vf.drip, f.tx ? Math.PI / 2 : 0);
+        }
+        put(tankM, i, f.gx + f.nx * 1.9 + f.nz * 3.6, f.gy, f.gz + f.nz * 1.9 + Math.abs(f.nx) * 3.6, vf.drip ? 1 : 0); // on the +z side of the hill gates: their tracks come in from -z
         touch(dripM, tankM);
       }
 
@@ -476,7 +514,7 @@ export const world = {
       if (e < 4.2) {
         drive(truckM, i, tracks[i], e < 1.5 ? sstep(0, 1.5, e) : 1 - sstep(2.7, 4.2, e), e > 2.7);
         if (e > 1.5 && e < 2.7) for (let j = 0; j < 3; j++) { const a = 4 + Math.random() * 9, b = R() * 12;
-          puff(f.gx - f.nx * 2, f.y + 2.2, f.gz - f.nz * 2, -f.nx * a + f.nz * b, 5 + Math.random() * 4, -f.nz * a - f.nx * b, 1, 0x9fd8ff, 14); }
+          puff(f.gx - f.nx * 2, f.gy + 2.2, f.gz - f.nz * 2, -f.nx * a + f.nz * b, 5 + Math.random() * 4, -f.nz * a - f.nx * b, 1, 0x9fd8ff, 14); }
       } else put(truckM, i, 0, -999, 0, 0);
       const ph = (t * 14 / hauls[i].getLength() + i * .3) % 2;
       if (crew) drive(pickupM, i, hauls[i], ph < 1 ? ph : 2 - ph, ph >= 1); else put(pickupM, i, 0, -999, 0, 0);
@@ -486,8 +524,8 @@ export const world = {
         const at = clamp(Math.ceil(vf.fruit * f.nM) - 1, 0, Math.max(0, f.nM - 1));
         for (let j = 0; j < 8; j++) {
           const a = j / crew * 6.283 + t * .4, on = j < crew, net = on && at - j >= 0;
-          if (on) put(pickerM, i * 8 + j, f.px[at] + Math.cos(a) * 2.4, f.y + 1.15 + Math.abs(Math.sin(t * 6 + j)) * .25, f.pz[at] + Math.sin(a) * 2.4, 1.8); else put(pickerM, i * 8 + j, 0, -999, 0, 0);
-          if (net) put(netM, i * 8 + j, f.px[at - j], f.y + .1, f.pz[at - j], 1, 1, 1, rnd(at - j) * 3); else put(netM, i * 8 + j, 0, -999, 0, 0);
+          if (on) put(pickerM, i * 8 + j, f.px[at] + Math.cos(a) * 2.4, f.py[at] + 1.15 + Math.abs(Math.sin(t * 6 + j)) * .25, f.pz[at] + Math.sin(a) * 2.4, 1.8); else put(pickerM, i * 8 + j, 0, -999, 0, 0);
+          if (net) put(netM, i * 8 + j, f.px[at - j], f.py[at - j] + .1, f.pz[at - j], 1, 1, 1, rnd(at - j) * 3); else put(netM, i * 8 + j, 0, -999, 0, 0);
         }
       }
     }
@@ -504,8 +542,9 @@ export const world = {
       const f = plots[Math.max(0, goatFarm)];
       for (let j = 0; j < 5; j++) {
         const id = goatId[j], a = t * .21 * (1 + id * .13) + id * 1.9, b = t * .17 * (1 + id * .11) + id * 2.7;
-        goatAt[j * 3] = f.x + Math.sin(a) * (f.hw - 3); goatAt[j * 3 + 1] = f.y + 1.2; goatAt[j * 3 + 2] = f.z + Math.sin(b) * (f.hd - 3);
-        if (j < gn) put(goatM, j, goatAt[j * 3], f.y + Math.abs(Math.sin(t * 5 + id)) * .25, goatAt[j * 3 + 2], 1.7, 1.7, 1.7, Math.atan2(Math.cos(a) * (f.hw - 3) * .21, Math.cos(b) * (f.hd - 3) * .17));
+        const gx = goatAt[j * 3] = f.x + Math.sin(a) * (f.hw - 3), gz = goatAt[j * 3 + 2] = f.z + Math.sin(b) * (f.hd - 3), gy = f.h(gx, gz);
+        goatAt[j * 3 + 1] = gy + 1.2;
+        if (j < gn) put(goatM, j, gx, gy + Math.abs(Math.sin(t * 5 + id)) * .25, goatAt[j * 3 + 2], 1.7, 1.7, 1.7, Math.atan2(Math.cos(a) * (f.hw - 3) * .21, Math.cos(b) * (f.hd - 3) * .17));
         else put(goatM, j, 0, -999, 0, 0);
       }
       touch(goatM);
@@ -539,8 +578,8 @@ export const world = {
       if (e >= .5) shake.f = null;
     }
     if (t - fireT < 3) for (let j = 0; j < 9; j++) { const f = plots[fireI], x = f.x + R() * f.hw * 1.6, z = f.z + R() * f.hd * 1.6;
-      if (j < 7) puff(x, f.y + .5 + Math.random() * 2, z, R() * 2, 4 + Math.random() * 5, R() * 2, .4 + Math.random() * .4, j % 3 ? 0xff7a1c : 0xffd23c);
-      else puff(x, f.y + 4, z, 1.5 + R(), 4 + Math.random() * 3, R(), 2, 0x4a4540); }
+      if (j < 7) puff(x, f.h(x, z) + .5 + Math.random() * 2, z, R() * 2, 4 + Math.random() * 5, R() * 2, .4 + Math.random() * .4, j % 3 ? 0xff7a1c : 0xffd23c);
+      else puff(x, f.h(x, z) + 4, z, 1.5 + R(), 4 + Math.random() * 3, R(), 2, 0x4a4540); }
     if (fwN && t >= fwAt) { // bursts from the farm road to the village, so they show from the opening camera too
       const x = 55 + R() * 90, z = -45 + R() * 30, y = G(x, z) + 14 + Math.random() * 10, hex = [0xffd23c, 0xff6fa8, 0x7fe3ff, 0xffffff, 0xb6f26a][fwN % 5];
       for (let j = 0; j < 70; j++) { v.set(R(), R(), R()).normalize().multiplyScalar(9 + Math.random() * 4); puff(x, y, z, v.x, v.y, v.z, 1 + Math.random() * .5, hex, 5); }
@@ -575,10 +614,9 @@ export const world = {
     let obj = caster.intersectObjects(buildings, true)[0]?.object;
     while (obj && !obj.userData.panel) obj = obj.parent;
     if (obj) return { kind:'building', panel:obj.userData.panel };
-    const r = caster.ray;
     for (let i = 0; i < plots.length; i++) { // crowns first: at a low camera the ground under a clicked tree is not where the ray lands
-      const f = plots[i], tree = nearTree(f) >= 0, u = (f.y - r.origin.y) / r.direction.y;
-      if (tree || u > 0 && Math.abs(r.origin.x + r.direction.x * u - f.x) < f.hw && Math.abs(r.origin.z + r.direction.z * u - f.z) < f.hd) return { kind:'farm', farm:i, tree };
+      const f = plots[i], tree = nearTree(f) >= 0, p = onPlot(f);
+      if (tree || p && Math.abs(p[0] - f.x) < f.hw && Math.abs(p[1] - f.z) < f.hd) return { kind:'farm', farm:i, tree };
     }
     return null;
   },
@@ -590,13 +628,13 @@ export const world = {
     fly.t0 = tNow; fly.on = true;
   },
   addTag(el, x, y, z) { tags.push({ el, pos:new THREE.Vector3(x, y, z) }); },
-  farmTop: i => [plots[i].x, plots[i].y + 9, plots[i].z],
+  farmTop: i => [plots[i].x, plots[i].y + 11, plots[i].z],
   screenOf(i) { const f = plots[i]; v.set(f.x, f.y, f.z).project(camera); return v.z > 1 ? null : { x:(v.x + 1) / 2 * innerWidth, y:(1 - v.y) / 2 * innerHeight }; },
   fx: {
     truck(i) { truckT[i] = tNow; },
     buy(i) { // the outline flashes, dust rises along the wall, the for-sale board drops
       const f = plots[i]; buyI = i; buyT = tNow;
-      for (let j = 0; j < 60; j++) { const a = j % 2 ? 1 : -1, b = R() * 2; puff(f.x + (j % 4 < 2 ? a * f.hw : b * f.hw), f.y + .5, f.z + (j % 4 < 2 ? b * f.hd : a * f.hd), R() * 2, 2 + Math.random() * 3, R() * 2, .7 + Math.random() * .5, 0xe6d9b8, 2); }
+      for (let j = 0; j < 60; j++) { const a = j % 2 ? 1 : -1, b = R() * 2, x = f.x + (j % 4 < 2 ? a * f.hw : b * f.hw), z = f.z + (j % 4 < 2 ? b * f.hd : a * f.hd); puff(x, f.h(x, z) + .5, z, R() * 2, 2 + Math.random() * 3, R() * 2, .7 + Math.random() * .5, 0xe6d9b8, 2); }
     },
     shake(i, cx, cy) {
       aim(cx, cy);
