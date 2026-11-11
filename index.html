@@ -13,7 +13,24 @@
   (data-i18n = text, data-i18n-html = markup, data-i18n-title = tooltip, data-i18n-aria = aria-label).
   Buttons act through data-a (an action in src/actions.js) and data-n (its argument).
 -->
-<div id="loading">Driving up to Mirsini… (needs an internet connection for three.js)</div>
+<!-- The loading screen is plain markup, so it shows before any script has arrived. Its few texts carry their Czech in data-cs. -->
+<div id="loading">
+  <div class="card">
+    <div class="olive">🫒</div>
+    <h1>Mirsini<small data-cs="Olivový magnát">Olive Tycoon</small></h1>
+    <div class="track"><i></i></div>
+    <p data-cs="Jedeme nahoru do Mirsini…">Driving up to Mirsini…</p>
+    <p id="slow" hidden><span data-cs="Trvá to dlouho? Hra při prvním spuštění potřebuje připojení k internetu.">Taking long? The game needs an internet connection the first time.</span>
+      <button onclick="location.reload()" data-cs="Načíst znovu">Reload</button></p>
+  </div>
+</div>
+<script>
+  (function () {
+    var lang; try { lang = localStorage.getItem('mirsini-lang'); } catch (e) {} // the language chosen in the game, else the browser's (as src/i18n.js decides)
+    if ((lang || navigator.language || '').slice(0, 2) === 'cs') [].forEach.call(document.querySelectorAll('#loading [data-cs]'), function (e) { e.textContent = e.dataset.cs; });
+    setTimeout(function () { var s = document.getElementById('slow'); if (s) s.hidden = false; }, 10000); // still here after ten seconds: say why, offer a reload
+  })();
+</script>
 <script>
   // After a new version is published, a browser can run this fresh page with script files it cached from the old version (they are cached
   // for ten minutes), and the mix breaks. So on the first error, re-download every file of the game past the cache and reload, once.
@@ -27,7 +44,7 @@
 </script>
 <script>
   // Browsers do not load JavaScript modules from file://, so say how to start the game instead of showing a blank page.
-  if (location.protocol === 'file:') document.getElementById('loading').innerHTML =
+  if (location.protocol === 'file:') document.querySelector('#loading .card').innerHTML =
     '<p style="max-width:34em;padding:16px">This game needs a local web server. In this folder run <b>npm start</b> (or <b>python3 -m http.server 8000</b>) and open <b>http://localhost:8000</b>.<br><br>' +
     'Hra potřebuje místní webový server. V této složce spusť <b>npm start</b> (nebo <b>python3 -m http.server 8000</b>) a otevři <b>http://localhost:8000</b>.</p>';
 </script>

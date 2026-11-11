@@ -58,6 +58,6 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-$('loading').remove(); $('hud').hidden = false;
+$('loading').classList.add('done'); setTimeout(() => $('loading').remove(), 500); $('hud').hidden = false; // the loading screen fades out over the first frames
 if (app.fresh) { app.speed = 0; openPanel('help'); }
 requestAnimationFrame(frame);
