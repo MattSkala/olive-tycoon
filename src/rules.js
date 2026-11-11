@@ -56,6 +56,8 @@ export const total = o => Object.values(o).reduce((a, b) => a + b, 0);
 // ---------- queries ----------
 export const slots = i => FARMS[i].cols * FARMS[i].rows;
 export const young = f => f.sap[0] + f.sap[1];
+/** What the player calls farm i: their own name for it, or the one in the farm table. */
+export const nameOf = (s, i) => s.farms[i].name || FARMS[i].name;
 export const trees = f => f.mature + young(f);
 export const freeSlots = (s, i) => slots(i) - trees(s.farms[i]);
 export const owned = s => s.farms.flatMap((f, i) => f.own ? [i] : []);
@@ -112,7 +114,7 @@ export const sellValue = (s, l) => (l = Math.min(l, s.oil)) > 0 ? l * sellPrice(
 export function buyFarm(s, i) {
   if (buyBlock(s, i) || !pay(s, FARMS[i].price, 'invest')) return false;
   s.farms[i].own = true; s.farms[i].moist = 50;
-  say('say.farmBought', { farm:FARMS[i].name }, 'good');
+  say('say.farmBought', { farm:nameOf(s, i) }, 'good');
   return true;
 }
 /** Plants up to `n` saplings; returns how many. */
@@ -120,7 +122,7 @@ export function plant(s, i, n) {
   n = Math.floor(Math.min(n, freeSlots(s, i)));
   if (!s.farms[i].own || !(n > 0) || !pay(s, n * SAPLING, 'invest')) return 0;
   s.farms[i].sap[1] += n; s.planted += n;
-  say('say.planted', { n, farm:FARMS[i].name });
+  say('say.planted', { n, farm:nameOf(s, i) });
   return n;
 }
 /** One water truck load: soil to 100. */
@@ -130,18 +132,22 @@ export function water(s, i) {
   f.moist = 100; f.lastWater = s.t; f.water += c; s.watered++;
   return true;
 }
+/** Renames farm i. The name ends up inside HTML, so markup characters are dropped; an empty name brings the original back. */
+export function rename(s, i, name) {
+  s.farms[i].name = String(name).replace(/[<>&"]/g, '').trim().slice(0, 24) || undefined;
+}
 /** Prunes every mature tree on the farm: a tidy canopy for two seasons, and a little health back. */
 export function prune(s, i) {
   const f = s.farms[i];
   if (!f.own || pruneBlock(s, i) || !pay(s, pruneCost(s, i), 'upkeep')) return false;
   f.pruned = 0; f.health = Math.min(100, f.health + PRUNE_HEALTH);
-  say('say.pruned', { farm:FARMS[i].name });
+  say('say.pruned', { farm:nameOf(s, i) });
   return true;
 }
 export function buyDrip(s, i) {
   const f = s.farms[i];
   if (!f.own || f.drip || !pay(s, dripCost(i), 'invest')) return false;
-  say('say.drip', { farm:FARMS[i].name });
+  say('say.drip', { farm:nameOf(s, i) });
   return f.drip = true;
 }
 /** Picks up to `kg`; picked olives are pressed the same day, at that farm's ripeness. Returns the kg picked. */
@@ -225,14 +231,14 @@ const EVENTS = {
   goats:{ months:[2, 3, 4, 5, 6, 7, 8], ok:s => !s.goats, kind:'warn', run:s => {
     const i = owned(s).sort((a, b) => young(s.farms[b]) - young(s.farms[a]) || s.farms[b].fruit - s.farms[a].fruit)[0];
     s.goats = { farm:i, n:5, days:30 };
-    return ['ev.goats.in', { farm:FARMS[i].name }]; } },
+    return ['ev.goats.in', { farm:nameOf(s, i) }]; } },
   boom:{ months:ALL, ok:() => true, run:s => (s.price += 3, 'ev.boom') },
   glut:{ months:ALL, ok:() => true, run:s => (s.price = Math.max(PRICE_MIN, s.price - 2), 'ev.glut') },
 };
 /** The pending decision for the UI: null, or { id, farm (name or undefined), opts:[{ cost, can }] }. */
 export function eventView(s) {
   const e = EVENTS[s.event];
-  return e ? { id:s.event, farm:FARMS[s.evFarm]?.name, opts:e.opts.map(o => { const cost = o.cost ? o.cost(s) : 0; return { cost, can:canPay(s, cost) }; }) } : null;
+  return e ? { id:s.event, farm:s.farms[s.evFarm] && nameOf(s, s.evFarm), opts:e.opts.map(o => { const cost = o.cost ? o.cost(s) : 0; return { cost, can:canPay(s, cost) }; }) } : null;
 }
 export function decide(s, k) {
   const e = EVENTS[s.event];
@@ -288,18 +294,18 @@ export function advice(s) {
   let i, o;
   const reserve = 3000 + 6 * upkeep(s); // a flat 3,000 did not cover a summer of upkeep on a big estate
   if (s.cash < 0 && s.oil >= 1) return tell('adv.overdrawnSell', { limit:-OVERDRAFT }, -1, 'sell');
-  if (s.goats) return tell('adv.goats', { farm:FARMS[s.goats.farm].name }, s.goats.farm);
-  if (m >= 3 && m <= 8 && (i = thirsty(s)[0]) >= 0) return tell('adv.thirsty', { farm:FARMS[i].name, band:band(s.farms[i].moist), cost:waterCost(s, i) }, i);
-  if (m >= 4 && m <= 8 && (i = undripped(s).find(i => farmStatus(s, i).daysLeft <= 5)) >= 0) return tell('adv.dryIn', { farm:FARMS[i].name, n:farmStatus(s, i).daysLeft }, i);
+  if (s.goats) return tell('adv.goats', { farm:nameOf(s, s.goats.farm) }, s.goats.farm);
+  if (m >= 3 && m <= 8 && (i = thirsty(s)[0]) >= 0) return tell('adv.thirsty', { farm:nameOf(s, i), band:band(s.farms[i].moist), cost:waterCost(s, i) }, i);
+  if (m >= 4 && m <= 8 && (i = undripped(s).find(i => farmStatus(s, i).daysLeft <= 5)) >= 0) return tell('adv.dryIn', { farm:nameOf(s, i), n:farmStatus(s, i).daysLeft }, i);
   if (o = s.orders.find(o => o.months < 1 && !canDeliver(s, o))) return tell('adv.orderDue', { buyer:o.buyer, l:o.litres, grade:gradeOf(o.minQ) }, -1, 'orders');
   if (!crewTotal(s) && (i = own.filter(i => canPick(s, i)).sort((a, b) => s.farms[b].fruit - s.farms[a].fruit)[0]) >= 0)
-    return tell('adv.pick', { farm:FARMS[i].name, kg:s.farms[i].fruit, stage:stageOf(s, i).name }, i);
+    return tell('adv.pick', { farm:nameOf(s, i), kg:s.farms[i].fruit, stage:stageOf(s, i).name }, i);
   if (s.cash < 0) return tell('adv.overdrawnEmpty', { limit:-OVERDRAFT }, -1, 'money');
   if (PRUNE_MONTHS.includes(m) && (i = own.find(i => canopyOf(s.farms[i]) !== 'tidy' && !pruneBlock(s, i) && s.cash >= pruneCost(s, i) + 1000)) >= 0)
-    return tell('adv.prune', { farm:FARMS[i].name, cost:pruneCost(s, i) }, i);
-  if ((m >= 9 || m <= 2) && s.cash >= reserve && (i = own.find(i => freeSlots(s, i) >= 10)) >= 0) return tell('adv.plant', { farm:FARMS[i].name }, i);
-  if ((i = forSale(s)[0]) >= 0 && s.cash >= FARMS[i].price + reserve) return tell('adv.afford', { farm:FARMS[i].name, price:FARMS[i].price }, i);
-  if ((i = own.find(i => trees(s.farms[i]) >= 30 && !s.farms[i].drip && s.cash >= dripCost(i) + reserve)) >= 0) return tell('adv.drip', { farm:FARMS[i].name, cost:dripCost(i) }, i);
+    return tell('adv.prune', { farm:nameOf(s, i), cost:pruneCost(s, i) }, i);
+  if ((m >= 9 || m <= 2) && s.cash >= reserve && (i = own.find(i => freeSlots(s, i) >= 10)) >= 0) return tell('adv.plant', { farm:nameOf(s, i) }, i);
+  if ((i = forSale(s)[0]) >= 0 && s.cash >= FARMS[i].price + reserve) return tell('adv.afford', { farm:nameOf(s, i), price:FARMS[i].price }, i);
+  if ((i = own.find(i => trees(s.farms[i]) >= 30 && !s.farms[i].drip && s.cash >= dripCost(i) + reserve)) >= 0) return tell('adv.drip', { farm:nameOf(s, i), cost:dripCost(i) }, i);
   if ((m >= 9 || m === 0) && fruitAll(s) >= 1) return tell('adv.harvest', {}, fruitiest(s));
   return m >= 9 || m <= 3 ? tell('adv.quiet', {}, -1, 'sell') : tell('adv.growing', {}, -1, 'farms');
 }
@@ -312,7 +318,7 @@ function monthStart(s) {
   const m = s.month = (s.month + 1) % 12;
   if (m >= 5 && m <= 9) for (const i of own) { // a parched summer kills young trees
     const f = s.farms[i], dead = f.sap.map(n => Math.ceil(n * .2));
-    if (f.moist < BAND_MIN.dry && dead[0] + dead[1]) { f.sap = [f.sap[0] - dead[0], f.sap[1] - dead[1]]; say('say.withered', { n:dead[0] + dead[1], farm:FARMS[i].name }, 'warn'); }
+    if (f.moist < BAND_MIN.dry && dead[0] + dead[1]) { f.sap = [f.sap[0] - dead[0], f.sap[1] - dead[1]]; say('say.withered', { n:dead[0] + dead[1], farm:nameOf(s, i) }, 'warn'); }
   }
   if (m === 0) { // new year: the older saplings mature
     s.year++;
@@ -390,13 +396,13 @@ function farmDay(s, i) {
   if (f.crew && canPick(s, i) && !pay(s, f.crew * WAGE / DAYS, 'wages')) { f.crew = 0; say('say.crewUnpaid', {}, 'warn'); }
   if (f.crew) {
     pick(s, i, f.crew * rate(s, i) / DAYS);
-    if (!canPick(s, i)) { f.crew = f.fruit = 0; say('say.stripped', { farm:FARMS[i].name }); }
+    if (!canPick(s, i)) { f.crew = f.fruit = 0; say('say.stripped', { farm:nameOf(s, i) }); }
   }
   // alert once on entering dry and once on entering parched; climbing back from parched to dry is not news
   const b = band(f.moist);
   if (f.moist >= DRY) f.warn = '';
   else if (m >= 3 && m <= 8 && n && !f.drip && (b === 'parched' ? f.warn !== b : !f.warn)) {
     f.warn = b;
-    say(b === 'dry' ? 'say.gettingDry' : 'say.parched', { farm:FARMS[i].name }, 'warn');
+    say(b === 'dry' ? 'say.gettingDry' : 'say.parched', { farm:nameOf(s, i) }, 'warn');
   }
 }

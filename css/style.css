@@ -61,7 +61,6 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 #tools { display:flex; gap:8px; }
 .tool { width:46px; height:46px; padding:0; font-size:19px; background:var(--cream); color:var(--ink); border:var(--line); border-radius:14px; box-shadow:var(--lift); }
 .tool:active { box-shadow:0 2px 0 rgba(47,58,26,.4); } .tool.on { background:var(--gold); }
-#thirst { background:#ffd9cc; animation:pulse 1s infinite; }
 
 /* ---- middle: objective and farm list on the left, the selected farm's card on the right */
 #mid { flex:1; min-height:0; display:flex; gap:10px; align-items:flex-start; }
@@ -85,6 +84,7 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 #card header small { color:#d8dfbd; }
 #card .x { position:absolute; top:5px; right:5px; color:var(--cream); }
 #cName { font-size:19px; } #cMore, .touchonly { display:none; }
+#cRename { background:none; border:0; box-shadow:none; min-height:0; padding:0 8px; font-size:15px; opacity:.7; vertical-align:2px; } /* the pencil after the farm's name */
 #card header { cursor:default; }
 #cTraits span { display:inline-block; background:rgba(255,255,255,.16); border-radius:8px; padding:1px 7px; font-size:12px; margin:4px 4px 0 0; }
 #cTraits .pos { color:#c9dd5a; } #cTraits .neg { color:#ffab8f; }
@@ -180,7 +180,7 @@ kbd { background:var(--well); border-radius:5px; padding:1px 6px; font:inherit; 
   #hud { gap:6px; padding:max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); }
   #list, #goal h3 { display:none; }
   .card { border-radius:14px; }
-  #card header { padding:0 12px 2px; } #cName { display:block; line-height:36px; } #card .x { height:36px; min-height:0; top:0; } #card header { cursor:pointer; }
+  #card header { padding:0 12px 2px; } #cName { display:inline-block; line-height:36px; max-width:calc(100% - 175px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:top; } #cRename { line-height:36px; vertical-align:top; } #card .x { height:36px; min-height:0; top:0; } #card header { cursor:pointer; }
   #card #cMore { display:block; position:absolute; top:5px; right:46px; height:26px; min-height:0; padding:0 11px; font-size:12.5px; white-space:nowrap; /* a pill that says what a tap on the header does */
     background:rgba(255,255,255,.14); color:var(--cream); border:1.5px solid #c9d1a8; border-radius:999px; box-shadow:none; }
   #card:not(.more) .xtra { display:none; }

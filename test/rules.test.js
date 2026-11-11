@@ -3,7 +3,7 @@
 import { DAYS, GOAL, SAPLING, PICK, CREW_MAX, UPGRADES, FARMS } from '../src/config.js';
 import {
   newGame, listen, total, slots, trees, freeSlots, owned, upkeep, matureAll, stageOf, canPick, growth, dripCost, forSale, worth, sellPrice,
-  buyFarm, plant, water, buyDrip, prune, pruneCost, pruneBlock, canopyOf, potential, setCrew, sell, upgrade, accept, canDeliver, deliver, decide, shoo, advice, stepDay,
+  buyFarm, plant, water, buyDrip, prune, pruneCost, pruneBlock, canopyOf, potential, setCrew, sell, upgrade, accept, canDeliver, deliver, decide, shoo, advice, stepDay, rename, nameOf,
 } from '../src/rules.js';
 
 // self-check (node): unit asserts, then four bots play 20 years each with every invariant checked daily
@@ -101,3 +101,14 @@ ok(A.at[12].w >= 1.5 * b12, `watering should pay: A ${Math.round(A.at[12].w)} vs
 ok(C.at[10].l >= 1.3 * D.at[10].l, `home farm watered ${Math.round(C.at[10].l)} L vs dry ${Math.round(D.at[10].l)} L`);
 console.log('self-check ok. worth after 12y: A', Math.round(A.at[12].w), 'B', Math.round(b12), '| A: farms', A.at[10].farms, 'mature', A.at[10].mature, 'by y10, rep', A.s.rep,
   'medals', A.s.medals, 'green', A.s.green, 'delivered', A.s.delivered, '| B withered', B.withered, '| litres in 10y: C', Math.round(C.at[10].l), 'D', Math.round(D.at[10].l));
+
+// renaming: the news uses the new name, markup is dropped, an empty name restores the original
+{
+  const g = newGame(), heard = [];
+  listen((key, params) => heard.push(params?.farm));
+  rename(g, 0, '  <b>Babiččin háj</b> & "syn"  '); plant(g, 0, 1);
+  ok(nameOf(g, 0) === 'bBabiččin háj/b  syn', `renamed to ${nameOf(g, 0)}`);
+  ok(heard.includes(nameOf(g, 0)), 'news names the farm as the player does');
+  rename(g, 0, '   '); ok(nameOf(g, 0) === FARMS[0].name, 'an empty name restores the original');
+  listen(() => {});
+}

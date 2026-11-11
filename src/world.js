@@ -274,7 +274,7 @@ function tag(panelName, key, x, y, z, id) { // `key` is the label's string key; 
   const el = document.createElement('button');
   el.className = 'tag'; el.dataset.a = 'open'; el.dataset.n = panelName; el.dataset.i18n = key; if (id) el.id = id;
   document.body.append(el);
-  tags.push({ el, pos:new THREE.Vector3(x, y, z), near:panelName !== 'orders' });
+  tags.push({ el, pos:new THREE.Vector3(x, y, z), see:new THREE.Vector3(x, G(x, z), z), near:panelName !== 'orders' });
 }
 function building(x, panelName, key, h, id) {
   const g = new THREE.Group(); g.position.set(x, 0, -10); g.userData.panel = panelName; scene.add(g); buildings.push(g);
@@ -692,13 +692,14 @@ export const world = {
       puffs.geometry.attributes.position.needsUpdate = puffs.geometry.attributes.color.needsUpdate = true;
     }
 
-    const [inL, inR, inT] = view.inset;
+    const [inL, inR, inT, inB] = view.inset;
     for (const tg of tags) {
+      // a label shows only while the farm or building it names is in the part of the window the HUD leaves free
+      v.copy(tg.see).project(camera);
+      const sx = (v.x + 1) / 2 * innerWidth, sy = (1 - v.y) / 2 * innerHeight;
+      const off = v.z > 1 || sx < inL || sx > innerWidth - inR || sy < inT || sy > innerHeight - inB || tg.near && dist > 250; // zoomed out, the three building tags only crowd the farm chips
       v.copy(tg.pos).project(camera);
-      const off = v.z > 1 || tg.near && dist > 250, hw = tg.el.offsetWidth / 2; // zoomed out, the three building tags only crowd the farm chips
-      let x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
-      if (x > 0 && x < innerWidth && y > 0) { x = clamp(x, inL + hw, innerWidth - inR - hw); y = Math.max(y, inT + tg.el.offsetHeight); } // a tag whose anchor is in view slides out from under the HUD docks
-      x = Math.round(x); y = off ? -1 : Math.round(y);
+      const hw = tg.el.offsetWidth / 2, x = Math.round(clamp((v.x + 1) / 2 * innerWidth, inL + hw, innerWidth - inR - hw)), y = off ? -1 : Math.round(Math.max((1 - v.y) / 2 * innerHeight, inT + tg.el.offsetHeight)); // the label itself stays whole inside that free part
       if (x === tg.x && y === tg.y) continue; // a still camera writes no styles
       tg.x = x; tg.y = y; tg.el.hidden = off;
       tg.el.style.transform = `translate(-50%,-100%) translate(${x}px,${y}px)`;
@@ -724,8 +725,7 @@ export const world = {
     else { fly.b.set(-4, 0, -25); fly.db.copy(HOME); fly.d1 = 410 * fit(); }
     fly.t0 = tNow; fly.on = true;
   },
-  addTag(el, x, y, z) { tags.push({ el, pos:new THREE.Vector3(x, y, z) }); },
-  farmTop: i => [plots[i].x, plots[i].y + 11, plots[i].z],
+  addTag(el, i) { const f = plots[i]; tags.push({ el, pos:new THREE.Vector3(f.x, f.y + 11, f.z), see:new THREE.Vector3(f.x, f.y, f.z) }); }, // a label floating above farm i
   screenOf(i) { const f = plots[i]; v.set(f.x, f.y, f.z).project(camera); return v.z > 1 ? null : { x:(v.x + 1) / 2 * innerWidth, y:(1 - v.y) / 2 * innerHeight }; },
   fx: {
     truck(i) { truckT[i] = tNow; },

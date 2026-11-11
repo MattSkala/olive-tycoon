@@ -23,7 +23,7 @@ bindInput();
 const NEWS_PANEL = { 'say.offer':'orders', 'say.orderMissed':'orders', 'say.delivered':'orders', 'say.sold':'sell', 'say.medal':'fame', 'say.noMedal':'fame', 'say.greenThumb':'fame',
   'say.bankSold':'money', 'say.crewUnpaid':'money', 'say.dripUnpaid':'money', 'say.matured':'farms', 'say.rotted':'farms', 'say.harvestOpen':'farms' };
 listen((key, params, kind) => {
-  toast(t(key, params), kind, () => go({ panel:NEWS_PANEL[key], farm:FARMS.findIndex(F => F.name === params.farm) })); // a tap goes to the panel or farm the news is about
+  toast(t(key, params), kind, () => go({ panel:NEWS_PANEL[key], farm:FARMS.findIndex((F, i) => nameOf(app.s, i) === params.farm) })); // a tap goes to the panel or farm the news is about
   if (kind === 'good') sfx.fanfare();
   if (kind === 'warn') { sfx.warn(); if (app.speed > 1) app.speed = 1; }
 });

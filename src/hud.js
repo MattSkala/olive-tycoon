@@ -8,7 +8,7 @@ import { DETAILS, SEASON, ledgerHTML } from './details.js';
 import { DAYS, GOAL, START_CASH, OVERDRAFT, OVERDRAFT_INTEREST, SAPLING, UPKEEP_TREE, UPKEEP_SAPLING, WAGE, CREW_MAX, UPGRADES, MAX_ORDERS, FARMS, CANOPY } from './config.js';
 import {
   OBJECTIVES, advice, buyBlock, canDeliver, canPay, canPick, canopyOf, crewTotal, pruneBlock, pruneCost, dripCost, eventView, farmStatus, freeSlots, fruitAll, fruitFrac, gradeOf, growth,
-  matureAll, owned, pickQ, rankOf, rate, sellPrice, sellValue, slots, stageOf, thirsty, trees, upkeep, waterCost, worth, young,
+  matureAll, nameOf, owned, pickQ, rankOf, rate, sellPrice, sellValue, slots, stageOf, trees, upkeep, waterCost, worth, young,
 } from './rules.js';
 
 // ---------- DOM helpers ----------
@@ -69,7 +69,8 @@ export function viewOf(frac) {
   const s = app.s;
   vw.month = s.month; vw.day = s.day + frac; vw.speed = app.speed; vw.rain = s.rain > 0; vw.heat = s.heat > 0; vw.overlay = app.overlay;
   const nw = narrow.matches; // on an upright phone the objective card lies across the top and there are no side docks
-  vw.inset = [nw ? 0 : $('left').offsetWidth + 14, app.sel >= 0 && !nw ? 332 : 0, $('mid').offsetTop + (nw ? $('left').offsetHeight : 0)]; // px the docks cover: left, right, top
+  vw.inset = [nw ? 0 : $('left').offsetWidth + 14, app.sel >= 0 && !nw ? 332 : 0, $('mid').offsetTop + (nw ? $('left').offsetHeight : 0),
+    innerHeight - Math.min($('bottom').getBoundingClientRect().top, nw && !$('card').hidden ? $('card').getBoundingClientRect().top : innerHeight)]; // px the docks cover: left, right, top, bottom
   vw.selected = app.sel; vw.hover = app.hover; vw.oil = s.oil; vw.rep = s.rep; vw.up = s.up; vw.goats = s.goats; vw.pressing = false;
   s.farms.forEach((f, i) => {
     const q = vw.farms[i];
@@ -87,7 +88,7 @@ export function initHud() {
     const el = document.createElement('div');
     el.dataset.a = 'select'; el.dataset.n = i;
     el.innerHTML = `<b></b><span class="bar"><i></i></span><span></span><button class="blue" data-a="water" data-n="${i}" data-i18n-title="chip.waterTip"></button>`;
-    document.body.append(el); world.addTag(el, ...world.farmTop(i));
+    document.body.append(el); world.addTag(el, i);
     return el;
   });
   $('list').innerHTML = FARMS.map((F, i) => `<div class="frow" data-a="select" data-n="${i}"><b></b><span class="bar"><i></i></span><small></small></div>`).join('');
@@ -117,7 +118,7 @@ export function refresh(frac) {
 }
 
 function refreshTop(s) {
-  const w = worth(s), dry = thirsty(s), crew = crewTotal(s), rank = rankOf(w), g = gradeName(s.oilQ);
+  const w = worth(s), crew = crewTotal(s), rank = rankOf(w), g = gradeName(s.oilQ);
   // estate card: rank, and the estate value on its way to the goal
   T('rankN', String(rank + 1)); T('rankT', t('title.' + rank));
   fill($('goalBar'), w / GOAL * 100);
@@ -129,11 +130,10 @@ function refreshTop(s) {
   T('oilG', s.oil >= 1 ? g : t('top.inCellar'));
   T('repV', `${Math.round(s.rep)}` + (s.medals ? ` · 🏅 ${s.medals}` : ''));
   // tools
-  hide($('thirst'), !dry.length); T('thirstN', String(dry.length)); prop($('thirst'), 'title', t('top.thirsty', { n:dry.length }));
   T('mute', audio.sfx || audio.music ? '🔊' : '🔇');
   // objective and advisor
   const ob = OBJECTIVES[s.goal], pr = ob?.prog?.(s);
-  T('goalT', !ob ? t('goal.allDone') : t('goal.' + s.goal, { target:GOAL }) + (pr ? t('goal.progress', { a:fmt.num(Math.floor(Math.min(pr[0], pr[1]))), b:fmt.num(pr[1]) }) : ''));
+  T('goalT', !ob ? t('goal.allDone') : t('goal.' + s.goal, { target:GOAL, home:nameOf(s, 0) }) + (pr ? t('goal.progress', { a:fmt.num(Math.floor(Math.min(pr[0], pr[1]))), b:fmt.num(pr[1]) }) : ''));
   hide($('goalR'), !ob?.cash); T('goalR', '+' + fmt.eur(ob?.cash || 0));
   fill($('goalP'), !ob ? 100 : pr ? pr[0] / pr[1] * 100 : 0);
   const adv = advice(s);
@@ -145,7 +145,7 @@ function refreshFarms(s) {
   FARMS.forEach((F, i) => {
     const f = s.farms[i], st = farmStatus(s, i), chip = chips[i], row = $('list').children[i], [cn, cb, cv, cw] = chip.children, [rn, rb, rs] = row.children;
     const goat = s.goats?.farm === i, hot = f.own && (goat || trees(f) > 0 && f.moist < 35) ? ' alert' : '', on = i === app.sel ? ' on' : '';
-    const label = (goat ? '🐐 ' : '') + (f.crew ? '🧺 ' : '') + F.name;
+    const label = (goat ? '🐐 ' : '') + (f.crew ? '🧺 ' : '') + nameOf(s, i);
     set(cn, label); set(rn, label);
     prop(chip, 'className', 'tag chip' + (f.own ? '' : ' sale') + hot + on); prop(row, 'className', 'frow' + hot + on);
     hide(cb, !f.own); hide(rb, !f.own); hide(cw, !f.own || f.drip || !trees(f));
@@ -167,7 +167,7 @@ function refreshCard(s) {
   if (app.sel < 0) return;
   const i = app.sel, F = FARMS[i], f = s.farms[i], st = farmStatus(s, i), stg = stageOf(s, i), free = freeSlots(s, i), n = Math.min(10, free), pk = canPick(s, i);
   T('cMore', $('card').classList.contains('more') ? `${t('card.less')} ▴` : `${t('card.details')} ▾`);
-  T('cName', F.name); T('cBlurb', t(`farm.${i}.blurb`));
+  T('cName', nameOf(s, i)); hide($('cRename'), !f.own); T('cBlurb', t(`farm.${i}.blurb`));
   setHTML('cTraits', `<span>${t('soil.' + F.soil)}</span>` + [['Fruit', F.fruit, 1], ['Drain', F.drain, -1], ['Q', F.q, 1]].map(([k, x, good]) =>
     `<span class="${x === 1 ? '' : (x - 1) * good > 0 ? 'pos' : 'neg'}">${t('card.trait' + k, { x })}</span>`).join('')
     + (F.late ? `<span>${t('card.traitLate')}</span>` : '') + `<span>${t('card.traitSlots', { n:slots(i) })}</span>`);
@@ -175,7 +175,7 @@ function refreshCard(s) {
   if (!f.own) {
     const block = buyBlock(s, i);
     T('cStands', t('card.stands', { stands:F.old ? t('card.standsTrees', { n:F.old, health:F.oldHealth / 100 }) : t('card.standsBare'), slots:slots(i), cost:dripCost(i) }));
-    btn('cBuy', t('card.buy', { farm:F.name, price:F.price }), block && t('block.' + block, { rep:F.rep }));
+    btn('cBuy', t('card.buy', { farm:nameOf(s, i), price:F.price }), block && t('block.' + block, { rep:F.rep }));
     return;
   }
   T('cTrees', t('card.trees', { mature:f.mature, young:young(f), free }));
@@ -265,7 +265,7 @@ function reportHTML(r) {
     <p><b>${t('rep.profit')} <span class="${r.profit < 0 ? 'neg' : ''}">${fmt.eur(r.profit)}</span></b><br>${t('rep.pressed', { l:r.litres })}${r.q ? t('rep.avgGrade', { grade:gradeOf(r.q) }) : ''}
       · ${r.medal ? t('rep.medal', { icon:MEDAL_ICON[r.medal], medal:r.medal }) : t('rep.noMedal')}</p>
     <table><tr>${['farm', 'picked', 'water', 'dryDays', 'health'].map(k => `<th>${t('rep.' + k)}</th>`).join('')}</tr>${r.farms.map(f =>
-      `<tr><td>${FARMS[f.i].name}</td><td>${t('u.kg', { kg:f.kg })}</td><td>${fmt.eur(f.water)}</td><td>${f.dryDays}</td><td>${fmt.pct(f.health / 100)}</td></tr>`).join('')}</table>
+      `<tr><td>${nameOf(app.s, f.i)}</td><td>${t('u.kg', { kg:f.kg })}</td><td>${fmt.eur(f.water)}</td><td>${f.dryDays}</td><td>${fmt.pct(f.health / 100)}</td></tr>`).join('')}</table>
     <p><b>${t('rep.worth', { w:r.worth })}</b> · ${t('title.' + rankOf(r.worth))} · ${t('rep.ofGoal', { pct:Math.max(0, r.worth) / GOAL })}</p>
     <table><tr><th>${t('rep.league')}</th><th>${t('rep.estate')}</th></tr>${r.league.map((l, k) =>
       `<tr class="${l.you ? 'you' : ''}"><td>${k + 1}. ${l.name ?? t('rep.you')}</td><td>${fmt.eur(l.worth)}</td></tr>`).join('')}</table>

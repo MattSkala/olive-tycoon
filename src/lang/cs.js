@@ -76,7 +76,7 @@ export default {
   'ev.boom':'Vývoz frčí! Ceny oleje vyskočily.', 'ev.glut':'Trh je přesycený. Ceny oleje spadly.',
 
   // ---- úkoly, popořadě
-  'goal.0':'Patriko je suché: pošli cisternu',
+  'goal.0':'Farma {home} je suchá: pošli cisternu',
   'goal.1':'Skliď první olivy: klikni na strom, nebo najmi česáče',
   'goal.2':'Vylisuj 300 l oleje',
   'goal.3':'Prodej 300 l oleje',
@@ -114,7 +114,6 @@ export default {
   'top.worthFinish':'Hodnota statku · k výhře dokonči úkoly',
   'top.worthTip':'Hotovost, olej, půda, stromy a vybavení. Dosáhni {goal:eur} a dokonči úkoly, a vyhraješ.',
   'top.repTip':'Pověst zvyšuje každou cenu, kterou dostaneš, a odemyká farmy',
-  'top.thirsty':{ one:'{n} farma žízní', few:'{n} farmy žízní', other:'{n} farem žízní' },
   'top.advTip':'Rada: kliknutím přejdeš na farmu',
   'speed.pause':'Pauza (mezerník)', 'speed.1':'Normální rychlost (klávesa 1)', 'speed.2':'Rychle (klávesa 2)', 'speed.3':'Nejrychleji (klávesa 3)', 'speed.sound':'Zvuk: hudba a efekty (M ztlumí vše)', 'speed.help':'Jak hrát',
 
@@ -129,7 +128,7 @@ export default {
   'canopy.tidyNote':'o {fruit:pct} víc plodů, sklizeň o {pick:pct} rychlejší', 'canopy.grownNote':'je čas na řez', 'canopy.wildNote':'o {fruit:pct} méně plodů, sklizeň o {pick:pct} pomalejší',
   'card.canopyL':'Koruny', 'card.prunedNow':'letos ořezáno', 'card.pruned':{ one:'ořezáno před {n} rokem', few:'ořezáno před {n} lety', other:'ořezáno před {n} lety' },
 
-  'card.close':'Zavřít', 'card.details':'Detaily', 'card.less':'Méně', 'card.detailsTip':'Zobrazit nebo skrýt podrobnosti farmy',
+  'card.close':'Zavřít', 'card.rename':'Přejmenovat farmu', 'card.renameAsk':'Nový název farmy (prázdné pole vrátí původní):', 'card.details':'Detaily', 'card.less':'Méně', 'card.detailsTip':'Zobrazit nebo skrýt podrobnosti farmy',
   'card.bWater':'Zalít', 'card.bDrip':'Závlaha', 'card.bFill':'Doplnit', 'card.bPrune':'Řez', 'card.keyW':'Poslat cisternu (klávesa W)', 'card.keyP':'Zasadit 10 sazenic (klávesa P)',
   'card.crewTip':'Česáči pracují na farmě, dokud není sklizená',
   'card.treesL':'Stromy', 'card.soilL':'Půda', 'card.healthL':'Zdraví', 'card.fruitL':'Plody', 'card.pickersL':'Česáči',

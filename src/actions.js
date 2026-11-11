@@ -7,7 +7,7 @@ import { t, fmt } from './i18n.js';
 import { $, float, floatAt, toast, openPanel, closePanel, locked } from './hud.js';
 import { FARMS, CREW_MAX } from './config.js';
 import {
-  OBJECTIVES, accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, prune, pruneCost, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
+  OBJECTIVES, accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, prune, pruneCost, rename, nameOf, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
 } from './rules.js';
 
 const select = i => { if (i >= 0) { app.sel = i; world.flyTo(i); } };
@@ -24,7 +24,6 @@ const ACTIONS = {
   select: n => select(+n),
   desel: () => { app.sel = -1; },
   more: () => { $('card').classList.toggle('more'); }, // the phone card's Details
-  thirst: () => select(thirsty(app.s)[0]),
   advise: () => go(advice(app.s)),
   goal: () => go(OBJECTIVES[app.s.goal]?.at(app.s)),
   pickFarm: n => { closePanel(); select(+n); }, // a row in the groves panel
@@ -39,6 +38,7 @@ const ACTIONS = {
     const i = app.sel, cost = i >= 0 && pruneCost(app.s, i);
     if (i >= 0 && prune(app.s, i)) { world.fx.prune(i); floatAt(i, `✂️ −${fmt.eur(cost)}`); sfx.snip(); return true; }
   },
+  rename: () => { const i = app.sel, name = i >= 0 && prompt(t('card.renameAsk'), nameOf(app.s, i)); if (typeof name === 'string') rename(app.s, i, name); }, // Cancel gives null: no change
   drip: () => { if (app.sel >= 0 && buyDrip(app.s, app.sel)) { world.fx.drip(app.sel); floatAt(app.sel, `−${fmt.eur(dripCost(app.sel))}`); } },
   buy: () => { if (app.sel >= 0 && buyFarm(app.s, app.sel)) { world.fx.buy(app.sel); floatAt(app.sel, `−${fmt.eur(FARMS[app.sel].price)}`); } },
   crew: (n, i = app.sel >= 0 ? app.sel : ripest(app.s)) => { if (i >= 0) setCrew(app.s, i, app.s.farms[i].crew + +n); },

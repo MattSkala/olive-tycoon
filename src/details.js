@@ -2,7 +2,7 @@
 // Each entry draws its panel's HTML from the game state; hud.js redraws the open one every frame.
 import { t, fmt, monthName } from './i18n.js';
 import { GOAL, RANK_MIN, OIL_VALUE, OVERDRAFT, OVERDRAFT_INTEREST, WAGE, FARMS, STAGE, EVAP, RAINP, PRUNE_MONTHS } from './config.js';
-import { buyBlock, canPick, canopyOf, crewTotal, farmStatus, rankOf, stageOf, upkeep, worth, worthParts } from './rules.js';
+import { buyBlock, canPick, canopyOf, crewTotal, farmStatus, nameOf, rankOf, stageOf, upkeep, worth, worthParts } from './rules.js';
 
 export const SEASON = ['❄️', '❄️', '🌸', '🌸', '🌸', '☀️', '☀️', '☀️', '🍂', '🍂', '🍂', '❄️']; // icon by month
 const cap = w => w[0].toUpperCase() + w.slice(1);
@@ -39,8 +39,8 @@ export const DETAILS = {
   farms(s) {
     const row = (F, i) => {
       const f = s.farms[i], st = farmStatus(s, i);
-      if (!f.own) return `<tr class="sale" data-a="pickFarm" data-n="${i}"><td>${F.name}</td><td class="wrap" colspan="3">${buyBlock(s, i) === 'rep' ? t('block.rep', { rep:F.rep }) : t('chip.forSale', { price:F.price })}</td></tr>`;
-      return `<tr data-a="pickFarm" data-n="${i}"><td>${F.name}</td><td class="${st.band}">${f.drip ? '💧 ' : ''}${cap(t('band.' + st.band))} ${fmt.pct(f.moist / 100)}</td>
+      if (!f.own) return `<tr class="sale" data-a="pickFarm" data-n="${i}"><td>${nameOf(s, i)}</td><td class="wrap" colspan="3">${buyBlock(s, i) === 'rep' ? t('block.rep', { rep:F.rep }) : t('chip.forSale', { price:F.price })}</td></tr>`;
+      return `<tr data-a="pickFarm" data-n="${i}"><td>${nameOf(s, i)}</td><td class="${st.band}">${f.drip ? '💧 ' : ''}${cap(t('band.' + st.band))} ${fmt.pct(f.moist / 100)}</td>
         <td>${t('u.kg', { kg:f.fruit })}${canPick(s, i) ? ' · ' + t('stage.' + stageOf(s, i).name) : ''}${f.crew ? ` · 🧺 ${f.crew}` : ''}</td><td>${cap(t('canopy.' + canopyOf(f)))}</td></tr>`;
     };
     return `<h2>${t('farms.title')}</h2>
@@ -53,7 +53,7 @@ export const DETAILS = {
       <p>${t('fame.now', { rep:Math.round(s.rep), bonus:s.rep / 200 })}</p>
       <p>🏅 ${t('end.medals', { n:s.medals })} · 🌿 ${t('fame.green', { n:s.green })}</p>
       <h3>${t('fame.unlocks')}</h3>
-      <table>${rows(FARMS.filter(F => F.rep).map(F => [`${s.rep >= F.rep ? '✅' : '🔒'} ${F.name}`, t('fame.need', { rep:F.rep })]))}</table>
+      <table>${rows(FARMS.flatMap((F, i) => F.rep ? [[`${s.rep >= F.rep ? '✅' : '🔒'} ${nameOf(s, i)}`, t('fame.need', { rep:F.rep })]] : []))}</table>
       <p class="muted">${t('fame.how')}</p>`;
   },
   // the olive year, month by month: rain, drying, and the work in the groves

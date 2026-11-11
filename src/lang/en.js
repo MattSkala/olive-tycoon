@@ -79,7 +79,7 @@ export default {
   'ev.optCost':'{label} · {cost:eur}',
 
   // ---- objectives, in order
-  'goal.0':'Patriko is dry: send the water truck',
+  'goal.0':'{home} is dry: send the water truck',
   'goal.1':'Pick your first olives: click a tree or hire pickers',
   'goal.2':'Press 300 L of oil',
   'goal.3':'Sell 300 L of oil',
@@ -118,7 +118,6 @@ export default {
   'top.worthFinish':'Estate value · finish the objectives to win',
   'top.worthTip':'Cash, oil, land, trees and equipment. Reach {goal:eur} and finish the objectives to win.',
   'top.repTip':'Reputation raises every price you get and unlocks farms',
-  'top.thirsty':{ one:'{n} farm thirsty', other:'{n} farms thirsty' },
   'top.advTip':'Advice: click to go to the farm',
   'speed.pause':'Pause (Space)', 'speed.1':'Normal speed (key 1)', 'speed.2':'Fast (key 2)', 'speed.3':'Fastest (key 3)', 'speed.sound':'Sound: music and effects (M mutes everything)', 'speed.help':'How to play',
 
@@ -133,7 +132,7 @@ export default {
   'canopy.tidyNote':'{fruit:pct} more fruit, picking {pick:pct} faster', 'canopy.grownNote':'due for pruning', 'canopy.wildNote':'{fruit:pct} less fruit, picking {pick:pct} slower',
   'card.canopyL':'Canopy', 'card.prunedNow':'pruned this year', 'card.pruned':{ one:'pruned {n} year ago', other:'pruned {n} years ago' },
 
-  'card.close':'Close', 'card.details':'Details', 'card.less':'Less', 'card.detailsTip':'Show or hide the farm details',
+  'card.close':'Close', 'card.rename':'Rename this farm', 'card.renameAsk':'New name for this farm (leave empty for the original name):', 'card.details':'Details', 'card.less':'Less', 'card.detailsTip':'Show or hide the farm details',
   'card.bWater':'Water', 'card.bDrip':'Drip', 'card.bFill':'Fill', 'card.bPrune':'Prune', 'card.keyW':'Send the water truck (key W)', 'card.keyP':'Plant 10 saplings (key P)',
   'card.whyNot':'{label}: {why}.', 'card.crewTip':'Pickers work this farm until it is stripped',
   'card.treesL':'Trees', 'card.soilL':'Soil', 'card.healthL':'Health', 'card.fruitL':'Fruit', 'card.pickersL':'Pickers',
