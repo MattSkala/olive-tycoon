@@ -3,6 +3,7 @@
 //   state.js   shared state, save and load       i18n.js     translation; the strings are in lang/*.js
 //   world.js   the 3D scene                      hud.js      the HTML over it
 //   actions.js buttons, keys and map clicks      audio.js    sounds
+//   tutorial.js the guided tour                  details.js  the detail panels
 import { app, load, save } from './state.js';
 import { sfx } from './audio.js';
 import { world, renderer, scene, camera, controls, fit } from './world.js';
@@ -11,6 +12,7 @@ import { $, toast, initHud, refresh, viewOf, openPanel, showEnd } from './hud.js
 import { bindInput, go } from './actions.js';
 import { FARMS } from './config.js';
 import { listen, stepDay } from './rules.js';
+import { startTutorial, tourTick } from './tutorial.js';
 
 const DAY_SEC = 1.05; // real seconds per game day at 1x: a month takes about half a minute
 
@@ -54,6 +56,8 @@ function frame(now) {
 
   const frac = s.over || s.event ? 0 : acc; // how far into the current day, for smooth bars
   world.update(viewOf(frac), now / 1000, dt); refresh(frac);
+  if (app.fresh && !app.panel) startTutorial(); // a new player has closed the help: show them around
+  tourTick();
   controls.update(); renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }

@@ -166,6 +166,14 @@ button.x { background:none; border:0; box-shadow:none; color:inherit; opacity:.7
 .chip .bar { width:40px; margin:0; }
 .chip button { padding:1px 8px; font-size:12px; border-radius:999px; box-shadow:none; }
 
+/* ---- the guided tour: a ring around what the step is about and a bubble beside it; above the HUD, under the panels */
+#spot { position:fixed; z-index:6; pointer-events:none; border:3px solid var(--gold); border-radius:18px; box-shadow:0 0 0 3px var(--ink); animation:glow 1.2s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow:0 0 0 3px var(--ink), 0 0 0 11px rgba(242,187,61,.5); } }
+@media (prefers-reduced-motion:reduce) { #spot { animation:none; } }
+#coach { position:fixed; left:0; top:0; z-index:6; width:min(330px, calc(100vw - 16px)); padding:12px 14px 10px; }
+#coach > b { font-size:18px; color:var(--olive-d); } #coach p { margin:4px 0 10px; }
+#coach div { display:flex; align-items:center; justify-content:space-between; gap:8px; } #coach .x { padding-left:0; }
+
 /* ---- modal panels: a header with the title, a body that scrolls, a footer for the buttons.
    The body is built of: .box (a framed group, often under a heading), .line (a row: icon, text, then a value or a button),
    .hero (the one number the panel is about), .facts (small tiles), .band (a highlighted total) and .note (the small print). */

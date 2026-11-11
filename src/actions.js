@@ -6,6 +6,7 @@ import { world, canvas } from './world.js';
 import { t, fmt } from './i18n.js';
 import { $, float, floatAt, toast, openPanel, closePanel, locked } from './hud.js';
 import { FARMS, CREW_MAX } from './config.js';
+import { startTutorial, nextStep, endTutorial } from './tutorial.js';
 import {
   OBJECTIVES, accept, advice, buyDrip, buyFarm, canPick, checkGoals, crewTotal, decide, deliver, dripCost, handPick, owned, plant, prune, pruneCost, rename, nameOf, sell, setCrew, setCrewAll, shoo, thirsty, upgrade, water, waterCost,
 } from './rules.js';
@@ -48,6 +49,7 @@ const ACTIONS = {
   deliver: n => { if (deliver(app.s, +n)) world.fx.van(); },
   decide: n => { const s = app.s, i = s.evFarm, fire = s.event === 'fire'; decide(s, +n); if (fire) world.fx.fire(i); closePanel(); }, // decide forgets the farm
   up: n => { if (upgrade(app.s, n)) { closePanel(); world.flyTo(n); world.fx.built(n); } }, // the panel closes so you watch it being built
+  tutorial: () => { closePanel(); startTutorial(); }, tutNext: nextStep, tutSkip: endTutorial, // the guided tour
   new: () => { if (app.s.over || confirm(t('confirm.new'))) { restart(); closePanel(); } },
 };
 
